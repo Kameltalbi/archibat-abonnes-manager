@@ -17,6 +17,7 @@ import SubscriptionTypes from "./pages/SubscriptionTypes";
 import Calendar from "./pages/Calendar";
 import WeeklyProgram from "./pages/WeeklyProgram";
 import Settings from "./pages/Settings";
+import Prospection from "./pages/Prospection";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,12 @@ const App = () => (
           <Route path="/parametres" element={
             <AppLayout>
               <Settings />
+            </AppLayout>
+          } />
+          {/* Add new route for Prospection */}
+          <Route path="/prospection" element={
+            <AppLayout>
+              <Prospection />
             </AppLayout>
           } />
           <Route path="*" element={<NotFound />} />

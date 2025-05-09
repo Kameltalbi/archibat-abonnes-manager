@@ -1,0 +1,108 @@
+
+import React, { useState } from 'react';
+import { PageHeader } from '@/components/common/PageHeader';
+import { ProspectionTable } from '@/components/prospection/ProspectionTable';
+import { Button } from '@/components/ui/button';
+import { PlusIcon, PhoneCallIcon } from 'lucide-react';
+import { AddProspectionModal } from '@/components/prospection/AddProspectionModal';
+import { Badge } from '@/components/ui/badge';
+
+const Prospection = () => {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  // Mock data - in a real app, this would come from Supabase
+  const [prospectionData, setProspectionData] = useState([
+    { 
+      id: 1, 
+      contactName: "Entreprise ABC", 
+      date: "2025-05-07", 
+      time: "14:30", 
+      type: "Appel téléphonique", 
+      notes: "Discussion sur les besoins en abonnement", 
+      result: "À relancer" 
+    },
+    { 
+      id: 2, 
+      contactName: "Cabinet XYZ", 
+      date: "2025-05-08", 
+      time: "10:00", 
+      type: "Rendez-vous physique", 
+      notes: "Présentation des offres", 
+      result: "Rendez-vous fixé" 
+    },
+    { 
+      id: 3, 
+      contactName: "Société 123", 
+      date: "2025-05-09", 
+      time: "16:15", 
+      type: "Visio", 
+      notes: "Démonstration de la plateforme", 
+      result: "Intéressé" 
+    }
+  ]);
+
+  const handleAddProspection = (newProspection) => {
+    setProspectionData([
+      ...prospectionData,
+      { id: prospectionData.length + 1, ...newProspection }
+    ]);
+  };
+
+  const handleDeleteProspection = (id) => {
+    setProspectionData(prospectionData.filter(item => item.id !== id));
+  };
+
+  return (
+    <div className="container mx-auto">
+      <PageHeader 
+        title="Prospection commerciale" 
+        description="Gestion des prospects et des appels"
+        icon={<PhoneCallIcon className="h-6 w-6 text-archibat-blue" />}
+      >
+        <div className="flex items-center gap-4">
+          <Badge variant="secondary" className="text-base py-1 px-3">
+            Appels: {prospectionData.length}
+          </Badge>
+          <Button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <PlusIcon className="h-4 w-4" />
+            Ajouter un appel
+          </Button>
+        </div>
+      </PageHeader>
+      
+      <div className="mt-6">
+        <div className="bg-white rounded-lg border shadow p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-medium">Liste des actions de prospection</h2>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">
+                Cette semaine
+              </Button>
+              <Button variant="outline" size="sm">
+                Ce mois
+              </Button>
+              <Button variant="outline" size="sm">
+                Tout
+              </Button>
+            </div>
+          </div>
+          
+          <ProspectionTable 
+            data={prospectionData}
+            onDelete={handleDeleteProspection}
+          />
+        </div>
+      </div>
+
+      <AddProspectionModal 
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        onAdd={handleAddProspection}
+      />
+    </div>
+  );
+};
+
+export default Prospection;

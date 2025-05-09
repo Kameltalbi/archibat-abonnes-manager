@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -24,7 +23,8 @@ import {
   EuroIcon,
   ChartBarIcon,
   SettingsIcon,
-  LogOutIcon
+  LogOutIcon,
+  PhoneCallIcon
 } from 'lucide-react';
 
 interface AppSidebarProps {
@@ -37,6 +37,7 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
     { title: "Abonnés locaux", icon: UserIcon, url: "/abonnes-locaux" },
     { title: "Abonnés internationaux", icon: EuroIcon, url: "/abonnes-internationaux" },
     { title: "Institutions", icon: UsersIcon, url: "/institutions" },
+    { title: "Prospection", icon: PhoneCallIcon, url: "/prospection" },
     { title: "Vente au numéro", icon: ShoppingCartIcon, url: "/ventes" },
     { title: "Type d'abonnement", icon: FileTextIcon, url: "/types-abonnement" },
     { title: "Calendrier", icon: CalendarIcon, url: "/calendrier" },
