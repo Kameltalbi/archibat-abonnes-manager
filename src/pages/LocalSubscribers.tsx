@@ -1,12 +1,9 @@
 import React from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SubscribersTable, Subscriber } from '@/components/subscribers/SubscribersTable';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { AddSubscriberModal } from '@/components/subscribers/AddSubscriberModal';
 
 const LocalSubscribers = () => {
-  const navigate = useNavigate();
-
   // Mock data for subscribers
   const subscribers: Subscriber[] = [
     {
@@ -161,9 +158,7 @@ const LocalSubscribers = () => {
         title="Abonnés locaux" 
         description="Gestion des abonnés en Tunisie"
       >
-        <Button onClick={() => navigate('/abonnes-locaux/nouveau')}>
-          Ajouter un abonné
-        </Button>
+        <AddSubscriberModal />
       </PageHeader>
 
       <SubscribersTable subscribers={subscribers} />

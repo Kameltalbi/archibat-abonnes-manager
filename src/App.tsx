@@ -9,7 +9,6 @@ import NotFound from "./pages/NotFound";
 import { AppLayout } from "./components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import LocalSubscribers from "./pages/LocalSubscribers";
-import NewSubscriber from "./pages/NewSubscriber";
 import InternationalSubscribers from "./pages/InternationalSubscribers";
 import Institutions from "./pages/Institutions";
 import Ventes from "./pages/Ventes";
@@ -35,11 +34,6 @@ const App = () => (
           <Route path="/abonnes-locaux" element={
             <AppLayout>
               <LocalSubscribers />
-            </AppLayout>
-          } />
-          <Route path="/abonnes-locaux/nouveau" element={
-            <AppLayout>
-              <NewSubscriber />
             </AppLayout>
           } />
           <Route path="/abonnes-internationaux" element={
