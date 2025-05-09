@@ -13,7 +13,11 @@ import {
   Globe
 } from 'lucide-react';
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  isOpen?: boolean;
+}
+
+export function AppSidebar({ isOpen = true }: AppSidebarProps) {
   const navItems = [
     { icon: LineChart, label: 'Tableau de bord', href: '/dashboard' },
     { icon: Users, label: 'Abonnés locaux', href: '/abonnes-locaux' },
@@ -42,7 +46,7 @@ export function AppSidebar() {
           }
         >
           <item.icon className="mr-2 h-4 w-4" />
-          {item.label}
+          {isOpen ? item.label : null}
         </NavLink>
       ))}
     </div>

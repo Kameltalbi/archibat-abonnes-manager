@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -59,7 +60,19 @@ export function AddProspectModal({ open, onOpenChange, onSubmit }: AddProspectMo
   });
 
   const handleSubmit = (values: FormValues) => {
-    onSubmit(values);
+    // Convert FormValues to Prospect
+    const prospect: Omit<Prospect, 'id' | 'dateCreation'> = {
+      entreprise: values.entreprise,
+      contact: values.contact,
+      email: values.email,
+      telephone: values.telephone,
+      statut: values.statut,
+      valeurPotentielle: values.valeurPotentielle,
+      dateDernierContact: values.dateDernierContact || new Date().toLocaleDateString('fr-FR'),
+      notes: values.notes,
+    };
+    
+    onSubmit(prospect);
     form.reset();
   };
 
