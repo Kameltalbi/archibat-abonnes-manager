@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { formatCurrency } from '@/lib/utils';
 
 interface SubscriptionTypeTableProps {
   subscriptionTypes: SubscriptionType[];
@@ -51,7 +52,7 @@ export function SubscriptionTypeTable({ subscriptionTypes, onToggleActive }: Sub
               <TableCell className="font-medium">{type.nom}</TableCell>
               <TableCell>{type.description}</TableCell>
               <TableCell>{type.duree} {type.duree > 1 ? 'mois' : 'mois'}</TableCell>
-              <TableCell>{type.prix} €</TableCell>
+              <TableCell>{formatCurrency(type.prix)}</TableCell>
               <TableCell>{getReaderTypeBadge(type.typeLecteur)}</TableCell>
               <TableCell>
                 <Badge variant={type.actif ? 'default' : 'outline'} className={type.actif ? 'bg-green-500 hover:bg-green-600' : ''}>
