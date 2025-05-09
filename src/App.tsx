@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import LocalSubscribers from "./pages/LocalSubscribers";
 import NewSubscriber from "./pages/NewSubscriber";
 import InternationalSubscribers from "./pages/InternationalSubscribers";
+import Institutions from "./pages/Institutions";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,11 @@ const App = () => (
           <Route path="/abonnes-internationaux" element={
             <AppLayout>
               <InternationalSubscribers />
+            </AppLayout>
+          } />
+          <Route path="/institutions" element={
+            <AppLayout>
+              <Institutions />
             </AppLayout>
           } />
           <Route path="*" element={<NotFound />} />
