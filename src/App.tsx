@@ -13,6 +13,7 @@ import NewSubscriber from "./pages/NewSubscriber";
 import InternationalSubscribers from "./pages/InternationalSubscribers";
 import Institutions from "./pages/Institutions";
 import Ventes from "./pages/Ventes";
+import SubscriptionTypes from "./pages/SubscriptionTypes";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,11 @@ const App = () => (
           <Route path="/ventes" element={
             <AppLayout>
               <Ventes />
+            </AppLayout>
+          } />
+          <Route path="/types-abonnement" element={
+            <AppLayout>
+              <SubscriptionTypes />
             </AppLayout>
           } />
           <Route path="*" element={<NotFound />} />
