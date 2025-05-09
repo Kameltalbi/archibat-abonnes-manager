@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PhoneIcon, UserIcon, MailIcon } from 'lucide-react';
+import { PhoneIcon, UserIcon, MailIcon, ImportIcon } from 'lucide-react';
 
 interface Contact {
   id: number;
@@ -28,14 +28,20 @@ export function ContactSelector({ contacts, onSelectContact }: ContactSelectorPr
   
   return (
     <div className="space-y-4">
-      <div className="relative">
-        <Input 
-          placeholder="Rechercher un contact..." 
-          value={searchTerm} 
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10"
-        />
-        <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+      <div className="flex justify-between items-center">
+        <div className="relative w-full mr-4">
+          <Input 
+            placeholder="Rechercher un contact..." 
+            value={searchTerm} 
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+          <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        </div>
+        <Button variant="outline" size="sm" className="flex items-center gap-2">
+          <ImportIcon className="h-4 w-4" />
+          <span>Importer</span>
+        </Button>
       </div>
       
       <div className="overflow-x-auto">

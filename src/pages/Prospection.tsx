@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { ProspectionTable } from '@/components/prospection/ProspectionTable';
 import { Button } from '@/components/ui/button';
-import { PlusIcon, PhoneCallIcon, UsersIcon } from 'lucide-react';
+import { PlusIcon, PhoneCallIcon, UsersIcon, ImportIcon } from 'lucide-react';
 import { AddProspectionModal } from '@/components/prospection/AddProspectionModal';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -129,7 +128,7 @@ const Prospection = () => {
             <Card className="bg-white rounded-lg border shadow p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-medium">Contacts à prospecter</h2>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
                   <PlusIcon className="h-4 w-4 mr-2" />
                   Nouveau contact
                 </Button>
@@ -155,4 +154,3 @@ const Prospection = () => {
 };
 
 export default Prospection;
-
