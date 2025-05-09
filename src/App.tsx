@@ -16,6 +16,7 @@ import Ventes from "./pages/Ventes";
 import SubscriptionTypes from "./pages/SubscriptionTypes";
 import Prospection from "./pages/Prospection";
 import Calendar from "./pages/Calendar";
+import WeeklyProgram from "./pages/WeeklyProgram";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +69,11 @@ const App = () => (
           <Route path="/calendrier" element={
             <AppLayout>
               <Calendar />
+            </AppLayout>
+          } />
+          <Route path="/programme-hebdomadaire" element={
+            <AppLayout>
+              <WeeklyProgram />
             </AppLayout>
           } />
           <Route path="*" element={<NotFound />} />
