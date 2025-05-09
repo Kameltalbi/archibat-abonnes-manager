@@ -69,22 +69,24 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
       </div>
       <SidebarContent>
         <SidebarGroup>
-          {isOpen && <SidebarGroupLabel>Menu principal</SidebarGroupLabel>}
+          {isOpen && <SidebarGroupLabel className="text-base font-semibold text-[#1E293B]">Menu principal</SidebarGroupLabel>}
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-2">
+            <SidebarMenu className="space-y-3 py-2">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
                       className={({ isActive }) => cn(
-                        "flex items-center py-2 px-3 rounded-md transition-colors",
+                        "flex items-center py-2.5 px-3 rounded-md transition-colors",
                         isOpen ? "justify-start" : "justify-center",
-                        isActive ? "bg-sidebar-accent text-archibat-blue font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-archibat-blue"
+                        isActive 
+                          ? "bg-sidebar-accent text-archibat-blue font-semibold" 
+                          : "text-[#1E293B] hover:bg-sidebar-accent hover:text-archibat-blue font-medium"
                       )}
                     >
-                      <item.icon className={cn("h-5 w-5", isOpen ? "mr-2" : "")} />
-                      {isOpen && <span>{item.title}</span>}
+                      <item.icon className={cn("h-5 w-5", isOpen ? "mr-3" : "")} />
+                      {isOpen && <span className="text-base">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -97,12 +99,12 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
       <SidebarFooter className="mt-auto border-t border-border p-4">
         <button 
           className={cn(
-            "flex items-center w-full py-2 px-3 rounded-md transition-colors hover:bg-destructive/10 hover:text-destructive text-sidebar-foreground",
+            "flex items-center w-full py-2.5 px-3 rounded-md transition-colors hover:bg-destructive/10 hover:text-destructive text-[#1E293B] font-medium",
             isOpen ? "justify-start" : "justify-center"
           )}
         >
-          <LogOutIcon className={cn("h-5 w-5", isOpen ? "mr-2" : "")} />
-          {isOpen && <span>Se déconnecter</span>}
+          <LogOutIcon className={cn("h-5 w-5", isOpen ? "mr-3" : "")} />
+          {isOpen && <span className="text-base">Se déconnecter</span>}
         </button>
       </SidebarFooter>
     </Sidebar>
