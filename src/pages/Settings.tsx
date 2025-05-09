@@ -1,11 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import UsersTab from '../components/settings/UsersTab';
 import RolesTab from '../components/settings/RolesTab';
 import PermissionsTab from '../components/settings/PermissionsTab';
-import DatabaseSetupTab from '../components/settings/DatabaseSetupTab';
 
 const Settings = () => {
   return (
@@ -16,11 +15,10 @@ const Settings = () => {
       </div>
       
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-8">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
           <TabsTrigger value="users">Utilisateurs</TabsTrigger>
           <TabsTrigger value="roles">Rôles</TabsTrigger>
           <TabsTrigger value="permissions">Permissions</TabsTrigger>
-          <TabsTrigger value="database">Base de données</TabsTrigger>
         </TabsList>
         <TabsContent value="users">
           <Card>
@@ -52,17 +50,6 @@ const Settings = () => {
             </CardHeader>
             <CardContent>
               <PermissionsTab />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="database">
-          <Card>
-            <CardHeader>
-              <CardTitle>Configuration de la base de données</CardTitle>
-              <CardDescription>Scripts pour créer les tables dans Supabase</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DatabaseSetupTab />
             </CardContent>
           </Card>
         </TabsContent>
