@@ -71,7 +71,13 @@ const App = () => (
               <Calendar />
             </AppLayout>
           } />
+          {/* Add both routes to the same component */}
           <Route path="/programme-hebdomadaire" element={
+            <AppLayout>
+              <WeeklyProgram />
+            </AppLayout>
+          } />
+          <Route path="/programme" element={
             <AppLayout>
               <WeeklyProgram />
             </AppLayout>
