@@ -29,6 +29,10 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           <MenuIcon className="h-5 w-5" />
         </Button>
         
+        <div className="mr-4">
+          <span className="text-xl font-bold text-archibat-blue">Archibat</span>
+        </div>
+        
         <div className="ml-auto flex items-center space-x-4">
           <div className="relative">
             <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

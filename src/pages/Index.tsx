@@ -4,10 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckIcon, DownloadIcon, FileTextIcon, UserIcon, MailIcon, SettingsIcon } from 'lucide-react';
+import { HomeHeader } from '@/components/layout/HomeHeader';
 
 const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
+      <HomeHeader />
+      
       {/* Hero Section */}
       <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-gray-100 text-archibat-dark">
         <div className="container mx-auto text-center px-4">
