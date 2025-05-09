@@ -1,15 +1,16 @@
 
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-export function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('fr-FR', {
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('fr-TN', {
     style: 'currency',
-    currency: 'EUR',
-    minimumFractionDigits: 2
-  }).format(amount);
+    currency: 'TND',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(value);
 }
