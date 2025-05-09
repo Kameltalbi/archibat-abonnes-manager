@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -14,16 +14,24 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface Contact {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+}
 
 interface AddProspectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdd: (data: any) => void;
+  selectedContact?: Contact | null;
 }
 
-export function AddProspectionModal({ open, onOpenChange, onAdd }: AddProspectionModalProps) {
+export function AddProspectionModal({ open, onOpenChange, onAdd, selectedContact }: AddProspectionModalProps) {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [formData, setFormData] = useState({
     contactName: '',
@@ -32,6 +40,16 @@ export function AddProspectionModal({ open, onOpenChange, onAdd }: AddProspectio
     notes: '',
     result: 'À relancer'
   });
+
+  // Pre-fill form with selected contact data
+  useEffect(() => {
+    if (selectedContact) {
+      setFormData(prev => ({
+        ...prev,
+        contactName: selectedContact.name
+      }));
+    }
+  }, [selectedContact]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -66,20 +84,34 @@ export function AddProspectionModal({ open, onOpenChange, onAdd }: AddProspectio
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-xl">Ajouter un appel ou rendez-vous</DialogTitle>
+          <DialogTitle className="text-xl">
+            {selectedContact 
+              ? `Contacter ${selectedContact.name}`
+              : 'Ajouter un appel ou rendez-vous'
+            }
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid gap-4">
             <div className="space-y-2">
               <Label htmlFor="contactName">Nom ou entreprise contactée</Label>
-              <Input 
-                id="contactName" 
-                name="contactName"
-                placeholder="Entrez le nom du contact ou de l'entreprise" 
-                value={formData.contactName}
-                onChange={handleInputChange}
-                required
-              />
+              <div className="relative">
+                <Input 
+                  id="contactName" 
+                  name="contactName"
+                  placeholder="Entrez le nom du contact ou de l'entreprise" 
+                  value={formData.contactName}
+                  onChange={handleInputChange}
+                  required
+                  className="pl-10"
+                />
+                <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              </div>
+              {selectedContact && (
+                <p className="text-sm text-muted-foreground">
+                  {selectedContact.phone} • {selectedContact.email}
+                </p>
+              )}
             </div>
             
             <div className="grid grid-cols-2 gap-4">
