@@ -14,7 +14,6 @@ import InternationalSubscribers from "./pages/InternationalSubscribers";
 import Institutions from "./pages/Institutions";
 import Ventes from "./pages/Ventes";
 import SubscriptionTypes from "./pages/SubscriptionTypes";
-import Prospection from "./pages/Prospection";
 import Calendar from "./pages/Calendar";
 import WeeklyProgram from "./pages/WeeklyProgram";
 import Settings from "./pages/Settings";
@@ -60,11 +59,6 @@ const App = () => (
           <Route path="/types-abonnement" element={
             <AppLayout>
               <SubscriptionTypes />
-            </AppLayout>
-          } />
-          <Route path="/prospection" element={
-            <AppLayout>
-              <Prospection />
             </AppLayout>
           } />
           <Route path="/calendrier" element={

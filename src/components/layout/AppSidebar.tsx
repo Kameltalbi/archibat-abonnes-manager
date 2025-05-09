@@ -39,7 +39,6 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
     { title: "Institutions", icon: UsersIcon, url: "/institutions" },
     { title: "Vente au numéro", icon: ShoppingCartIcon, url: "/ventes" },
     { title: "Type d'abonnement", icon: FileTextIcon, url: "/types-abonnement" },
-    { title: "Prospection", icon: DollarSignIcon, url: "/prospection" },
     { title: "Calendrier", icon: CalendarIcon, url: "/calendrier" },
     { title: "Programme de travail", icon: ListIcon, url: "/programme" },
     { title: "Paramètres", icon: SettingsIcon, url: "/parametres" }
