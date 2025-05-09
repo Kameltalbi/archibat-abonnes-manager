@@ -10,6 +10,7 @@ import { AppLayout } from "./components/layout/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import LocalSubscribers from "./pages/LocalSubscribers";
 import NewSubscriber from "./pages/NewSubscriber";
+import InternationalSubscribers from "./pages/InternationalSubscribers";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,11 @@ const App = () => (
           <Route path="/abonnes-locaux/nouveau" element={
             <AppLayout>
               <NewSubscriber />
+            </AppLayout>
+          } />
+          <Route path="/abonnes-internationaux" element={
+            <AppLayout>
+              <InternationalSubscribers />
             </AppLayout>
           } />
           <Route path="*" element={<NotFound />} />
