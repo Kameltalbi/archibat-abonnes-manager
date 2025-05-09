@@ -46,7 +46,7 @@ export function AppSidebar({ isOpen = true }: AppSidebarProps) {
           }
         >
           <item.icon className="mr-2 h-4 w-4" />
-          {isOpen ? item.label : null}
+          {item.label}
         </NavLink>
       ))}
     </div>
