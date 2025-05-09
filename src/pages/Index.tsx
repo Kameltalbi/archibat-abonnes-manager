@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -9,11 +8,10 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Hero Section */}
-      <section className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800 text-white">
-        <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?auto=format&fit=crop&q=80')] bg-cover bg-center"></div>
-        <div className="container mx-auto text-center relative z-10 px-4">
+      <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-gray-100 text-archibat-dark">
+        <div className="container mx-auto text-center px-4">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">Bienvenue sur votre espace pro Archibat</h1>
-          <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto">Gérez vos abonnements, vos contenus et vos services digitaux</p>
+          <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto text-gray-700">Gérez vos abonnements, vos contenus et vos services digitaux</p>
           <Button asChild className="text-lg px-8 py-6 h-auto bg-archibat-blue hover:bg-archibat-blue/80">
             <Link to="/dashboard">Se connecter</Link>
           </Button>
@@ -33,11 +31,11 @@ const Index = () => {
                   className="w-full h-auto rounded"
                 />
               </div>
-              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-archibat-pink/20 rounded-full"></div>
+              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-archibat-violet/20 rounded-full"></div>
             </div>
             
             <div>
-              <h2 className="text-3xl font-bold mb-6">Découvrez Archibat</h2>
+              <h2 className="text-3xl font-bold mb-6 text-archibat-dark">Découvrez Archibat</h2>
               <p className="text-lg mb-6">Archibat est la référence des professionnels de l'architecture et du bâtiment depuis 1997.</p>
               <ul className="space-y-3">
                 <li className="flex items-center">
