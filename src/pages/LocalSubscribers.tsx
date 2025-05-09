@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SubscribersTable, Subscriber } from '@/components/subscribers/SubscribersTable';
