@@ -62,10 +62,10 @@ const Dashboard = () => {
   ];
 
   const upcomingEvents = [
-    { id: '1', title: 'Relance des abonnements expirés', date: '15 Mai 2023', time: '10:00', type: 'task' },
-    { id: '2', title: 'Réunion équipe commerciale', date: '17 Mai 2023', time: '14:30', type: 'meeting' },
-    { id: '3', title: 'Échéance paiement facture #12345', date: '20 Mai 2023', time: '23:59', type: 'deadline' },
-    { id: '4', title: 'Appel prospect Institut d\'Architecture', date: '22 Mai 2023', time: '11:00', type: 'meeting' },
+    { id: '1', title: 'Relance des abonnements expirés', date: '15 Mai 2023', time: '10:00', type: 'task' as const },
+    { id: '2', title: 'Réunion équipe commerciale', date: '17 Mai 2023', time: '14:30', type: 'meeting' as const },
+    { id: '3', title: 'Échéance paiement facture #12345', date: '20 Mai 2023', time: '23:59', type: 'deadline' as const },
+    { id: '4', title: 'Appel prospect Institut d\'Architecture', date: '22 Mai 2023', time: '11:00', type: 'meeting' as const },
   ];
 
   return (

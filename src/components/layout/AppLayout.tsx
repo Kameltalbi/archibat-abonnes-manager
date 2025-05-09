@@ -21,12 +21,10 @@ export function AppLayout({ children }: AppLayoutProps) {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar isOpen={sidebarOpen} />
-        <div className={`flex flex-col flex-grow transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-16'}`}>
+        <div className={`flex flex-col flex-grow transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-16'}`}>
           <AppHeader onMenuClick={toggleSidebar} />
-          <div className="flex-grow p-6">
-            <div className="container mx-auto">
-              {children}
-            </div>
+          <div className="flex-grow p-4">
+            {children}
           </div>
         </div>
         <Toaster />
