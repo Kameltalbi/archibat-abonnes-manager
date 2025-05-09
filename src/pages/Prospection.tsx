@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
-import { ContactsIcon } from 'lucide-react';
+import { Contact } from 'lucide-react';
 import { ProspectionPipeline } from '@/components/prospection/ProspectionPipeline';
 import { ProspectionTable } from '@/components/prospection/ProspectionTable';
 import { Button } from '@/components/ui/button';
@@ -150,7 +150,7 @@ const Prospection = () => {
       <PageHeader
         title="Pipeline de prospection"
         description="Suivez vos prospects et votre processus commercial"
-        icon={<ContactsIcon className="h-6 w-6 text-amber-500" />}
+        icon={<Contact className="h-6 w-6 text-amber-500" />}
       >
         <Button onClick={() => setIsModalOpen(true)}>
           Ajouter un prospect

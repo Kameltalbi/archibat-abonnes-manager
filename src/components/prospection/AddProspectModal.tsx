@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -42,8 +41,10 @@ const formSchema = z.object({
   notes: z.string(),
 });
 
+type FormValues = z.infer<typeof formSchema>;
+
 export function AddProspectModal({ open, onOpenChange, onSubmit }: AddProspectModalProps) {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       entreprise: '',
@@ -57,7 +58,7 @@ export function AddProspectModal({ open, onOpenChange, onSubmit }: AddProspectMo
     },
   });
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = (values: FormValues) => {
     onSubmit(values);
     form.reset();
   };
