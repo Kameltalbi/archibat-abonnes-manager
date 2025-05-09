@@ -41,13 +41,13 @@ export function HomeHeader() {
                         </Link>
                       </NavigationMenuLink>
                     </li>
-                    <ListItem href="/" title="Revues numériques">
+                    <ListItem href="/" title="Revues numériques" className="">
                       Accédez à toutes nos publications en version numérique
                     </ListItem>
-                    <ListItem href="/" title="Gestion des abonnements">
+                    <ListItem href="/" title="Gestion des abonnements" className="">
                       Gérez facilement vos abonnements et factures
                     </ListItem>
-                    <ListItem href="/" title="Services professionnels">
+                    <ListItem href="/" title="Services professionnels" className="">
                       Découvrez nos services dédiés aux professionnels
                     </ListItem>
                   </ul>
@@ -63,13 +63,13 @@ export function HomeHeader() {
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px]">
-                    <ListItem href="/" title="Abonnement Standard" price="29 900 FCFA/an">
+                    <ListItem href="/" title="Abonnement Standard" price="29 900 FCFA/an" className="">
                       Version papier et accès limité aux archives
                     </ListItem>
-                    <ListItem href="/" title="Abonnement Pro" price="49 900 FCFA/an">
+                    <ListItem href="/" title="Abonnement Pro" price="49 900 FCFA/an" className="">
                       Version papier, numérique et accès complet
                     </ListItem>
-                    <ListItem href="/" title="Pack Digital" price="19 900 FCFA/an">
+                    <ListItem href="/" title="Pack Digital" price="19 900 FCFA/an" className="">
                       Accès 100% numérique
                     </ListItem>
                   </ul>
@@ -101,7 +101,19 @@ export function HomeHeader() {
   );
 }
 
-const ListItem = ({ className, title, price, children, ...props }) => {
+const ListItem = ({ 
+  className, 
+  title, 
+  price, 
+  children, 
+  ...props 
+}: { 
+  className: string;
+  title: string;
+  price?: string;
+  children: React.ReactNode;
+  [x: string]: any;
+}) => {
   return (
     <li>
       <NavigationMenuLink asChild>
@@ -122,4 +134,3 @@ const ListItem = ({ className, title, price, children, ...props }) => {
     </li>
   );
 };
-
