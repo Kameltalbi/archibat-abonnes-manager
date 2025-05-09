@@ -3,6 +3,7 @@ import React from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { InternationalSubscribersTable, InternationalSubscriber } from '@/components/subscribers/InternationalSubscribersTable';
 import { Globe } from 'lucide-react';
+import { AddSubscriberModal } from '@/components/subscribers/AddSubscriberModal';
 
 const InternationalSubscribers = () => {
   // Données fictives pour les abonnés internationaux
@@ -106,7 +107,9 @@ const InternationalSubscribers = () => {
         title="Abonnés internationaux" 
         description="Gestion des abonnés internationaux"
         icon={<Globe className="h-6 w-6 text-purple-500" />}
-      />
+      >
+        <AddSubscriberModal />
+      </PageHeader>
       
       <InternationalSubscribersTable subscribers={mockSubscribers} />
     </div>

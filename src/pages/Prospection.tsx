@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { ProspectionTable } from '@/components/prospection/ProspectionTable';
@@ -8,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ContactSelector } from '@/components/prospection/ContactSelector';
+import { AddSubscriberModal } from '@/components/subscribers/AddSubscriberModal';
 
 const Prospection = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -128,10 +130,13 @@ const Prospection = () => {
             <Card className="bg-white rounded-lg border shadow p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-medium">Contacts à prospecter</h2>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Nouveau contact
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <PlusIcon className="h-4 w-4" />
+                    Nouveau contact
+                  </Button>
+                  <AddSubscriberModal />
+                </div>
               </div>
               
               <ContactSelector 

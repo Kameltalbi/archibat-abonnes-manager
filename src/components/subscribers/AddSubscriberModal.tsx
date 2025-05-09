@@ -19,12 +19,12 @@ export function AddSubscriberModal() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Ajouter un abonné
+          Ajouter
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nouvel abonné</DialogTitle>
+          <DialogTitle>Nouvel abonnement</DialogTitle>
         </DialogHeader>
         <SubscriberForm onClose={() => setOpen(false)} />
       </DialogContent>

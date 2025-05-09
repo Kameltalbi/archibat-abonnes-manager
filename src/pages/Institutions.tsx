@@ -3,6 +3,7 @@ import React from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { InstitutionsTable, Institution } from '@/components/institutions/InstitutionsTable';
 import { Building2 } from 'lucide-react';
+import { AddSubscriberModal } from '@/components/subscribers/AddSubscriberModal';
 
 const Institutions = () => {
   // Données fictives pour les institutions
@@ -70,7 +71,9 @@ const Institutions = () => {
         title="Institutions" 
         description="Gestion des institutions partenaires"
         icon={<Building2 className="h-6 w-6 text-blue-500" />}
-      />
+      >
+        <AddSubscriberModal />
+      </PageHeader>
       
       <InstitutionsTable institutions={mockInstitutions} />
     </div>
