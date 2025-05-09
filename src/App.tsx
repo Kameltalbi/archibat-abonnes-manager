@@ -12,6 +12,7 @@ import LocalSubscribers from "./pages/LocalSubscribers";
 import NewSubscriber from "./pages/NewSubscriber";
 import InternationalSubscribers from "./pages/InternationalSubscribers";
 import Institutions from "./pages/Institutions";
+import Ventes from "./pages/Ventes";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,11 @@ const App = () => (
           <Route path="/institutions" element={
             <AppLayout>
               <Institutions />
+            </AppLayout>
+          } />
+          <Route path="/ventes" element={
+            <AppLayout>
+              <Ventes />
             </AppLayout>
           } />
           <Route path="*" element={<NotFound />} />
