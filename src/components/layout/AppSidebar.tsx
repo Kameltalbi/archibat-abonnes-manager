@@ -11,6 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarFooter
 } from '@/components/ui/sidebar';
 import { 
   UserIcon, 
@@ -22,7 +23,8 @@ import {
   DollarSignIcon,
   EuroIcon,
   ChartBarIcon,
-  ChartLineIcon
+  ChartLineIcon,
+  LogOutIcon
 } from 'lucide-react';
 
 interface AppSidebarProps {
@@ -91,6 +93,19 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      
+      {/* Ajout du bouton de déconnexion en bas */}
+      <SidebarFooter className="mt-auto border-t border-border p-4">
+        <button 
+          className={cn(
+            "flex items-center w-full py-2 px-3 rounded-md transition-colors hover:bg-destructive/10 hover:text-destructive text-sidebar-foreground",
+            isOpen ? "justify-start" : "justify-center"
+          )}
+        >
+          <LogOutIcon className={cn("h-5 w-5", isOpen ? "mr-2" : "")} />
+          {isOpen && <span>Se déconnecter</span>}
+        </button>
+      </SidebarFooter>
     </Sidebar>
   );
 }
