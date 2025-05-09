@@ -83,7 +83,7 @@ const App = () => (
               <Settings />
             </AppLayout>
           } />
-          {/* Add new route for Prospection */}
+          {/* Add route for Prospection */}
           <Route path="/prospection" element={
             <AppLayout>
               <Prospection />
