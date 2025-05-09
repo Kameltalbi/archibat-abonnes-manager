@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -22,7 +23,7 @@ import {
   DollarSignIcon,
   EuroIcon,
   ChartBarIcon,
-  ChartLineIcon,
+  SettingsIcon,
   LogOutIcon
 } from 'lucide-react';
 
@@ -41,7 +42,7 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
     { title: "Prospection", icon: DollarSignIcon, url: "/prospection" },
     { title: "Calendrier", icon: CalendarIcon, url: "/calendrier" },
     { title: "Programme de travail", icon: ListIcon, url: "/programme" },
-    { title: "Paramètres", icon: ChartLineIcon, url: "/parametres" }
+    { title: "Paramètres", icon: SettingsIcon, url: "/parametres" }
   ];
 
   return (
@@ -70,7 +71,7 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
         <SidebarGroup>
           {isOpen && <SidebarGroupLabel>Menu principal</SidebarGroupLabel>}
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-2"> {/* Ajout de l'espace vertical entre les éléments */}
+            <SidebarMenu className="space-y-2">
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
@@ -93,7 +94,6 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
       
-      {/* Ajout du bouton de déconnexion en bas */}
       <SidebarFooter className="mt-auto border-t border-border p-4">
         <button 
           className={cn(

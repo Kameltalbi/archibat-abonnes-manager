@@ -17,6 +17,7 @@ import SubscriptionTypes from "./pages/SubscriptionTypes";
 import Prospection from "./pages/Prospection";
 import Calendar from "./pages/Calendar";
 import WeeklyProgram from "./pages/WeeklyProgram";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,11 @@ const App = () => (
           <Route path="/programme" element={
             <AppLayout>
               <WeeklyProgram />
+            </AppLayout>
+          } />
+          <Route path="/parametres" element={
+            <AppLayout>
+              <Settings />
             </AppLayout>
           } />
           <Route path="*" element={<NotFound />} />
