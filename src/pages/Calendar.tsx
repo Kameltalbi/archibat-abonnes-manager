@@ -107,6 +107,7 @@ const Calendar = () => {
                 }}
                 fixedWeeks
                 showOutsideDays
+                locale={fr}
               />
             </CardContent>
           </Card>
