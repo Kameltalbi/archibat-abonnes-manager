@@ -2,95 +2,49 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@/components/ui/sidebar';
 import { 
-  UserIcon, 
-  UsersIcon, 
-  ListIcon, 
-  CalendarIcon, 
-  FileTextIcon,
-  ShoppingCartIcon,
-  DollarSignIcon,
-  EuroIcon,
-  ChartBarIcon,
-  ChartLineIcon
+  LineChart, 
+  Users, 
+  Building, 
+  Receipt, 
+  Tag,
+  Contact,
+  CalendarCheck,
+  Globe
 } from 'lucide-react';
 
-interface AppSidebarProps {
-  isOpen: boolean;
-}
-
-export function AppSidebar({ isOpen }: AppSidebarProps) {
-  const menuItems = [
-    { title: "Dashboard", icon: ChartBarIcon, url: "/" },
-    { title: "Abonnés locaux", icon: UserIcon, url: "/abonnes-locaux" },
-    { title: "Abonnés internationaux", icon: EuroIcon, url: "/abonnes-internationaux" },
-    { title: "Institutions", icon: UsersIcon, url: "/institutions" },
-    { title: "Vente au numéro", icon: ShoppingCartIcon, url: "/ventes" },
-    { title: "Type d'abonnement", icon: FileTextIcon, url: "/types-abonnement" },
-    { title: "Prospection", icon: DollarSignIcon, url: "/prospection" },
-    { title: "Calendrier", icon: CalendarIcon, url: "/calendrier" },
-    { title: "Programme de travail", icon: ListIcon, url: "/programme" },
-    { title: "Paramètres", icon: ChartLineIcon, url: "/parametres" }
+export function AppSidebar() {
+  const navItems = [
+    { icon: LineChart, label: 'Tableau de bord', href: '/dashboard' },
+    { icon: Users, label: 'Abonnés locaux', href: '/abonnes-locaux' },
+    { icon: Globe, label: 'Abonnés internationaux', href: '/abonnes-internationaux' },
+    { icon: Building, label: 'Institutions', href: '/institutions' },
+    { icon: CalendarCheck, label: 'Calendrier', href: '/calendrier' },
+    { icon: Tag, label: "Types d'abonnement", href: '/types-abonnement' },
+    { icon: Contact, label: 'Prospection', href: '/prospection' },
+    { icon: Receipt, label: 'Ventes', href: '/ventes' },
   ];
 
   return (
-    <Sidebar className={cn(
-      "h-screen fixed left-0 top-0 z-40 border-r border-border transition-all duration-300",
-      isOpen ? "w-64" : "w-16"
-    )}>
-      <div className={cn(
-        "h-16 flex items-center px-6 border-b border-border", 
-        isOpen ? "justify-start" : "justify-center"
-      )}>
-        {isOpen ? (
-          <div className="flex items-center">
-            <div className="h-8 w-8 rounded-md archibat-gradient flex items-center justify-center">
-              <span className="font-bold text-white">A</span>
-            </div>
-            <h1 className="text-xl font-bold ml-2 text-archibat-blue">Archibat</h1>
-          </div>
-        ) : (
-          <div className="h-8 w-8 rounded-md archibat-gradient flex items-center justify-center">
-            <span className="font-bold text-white">A</span>
-          </div>
-        )}
-      </div>
-      <SidebarContent>
-        <SidebarGroup>
-          {isOpen && <SidebarGroupLabel>Menu principal</SidebarGroupLabel>}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      className={({ isActive }) => cn(
-                        "flex items-center py-2 px-3 rounded-md transition-colors",
-                        isOpen ? "justify-start" : "justify-center",
-                        isActive ? "bg-sidebar-accent text-archibat-blue font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-archibat-blue"
-                      )}
-                    >
-                      <item.icon className={cn("h-5 w-5", isOpen ? "mr-2" : "")} />
-                      {isOpen && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+    <div className="flex flex-col h-full py-4 gap-1">
+      {navItems.map((item) => (
+        <NavLink
+          key={item.href}
+          to={item.href}
+          className={({ isActive }) =>
+            cn(
+              "flex items-center px-3 py-2 rounded-md text-sm transition-colors",
+              "hover:bg-primary/10",
+              isActive
+                ? "text-primary bg-primary/10 font-medium"
+                : "text-muted-foreground"
+            )
+          }
+        >
+          <item.icon className="mr-2 h-4 w-4" />
+          {item.label}
+        </NavLink>
+      ))}
+    </div>
   );
 }

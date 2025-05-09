@@ -15,6 +15,7 @@ import Institutions from "./pages/Institutions";
 import Ventes from "./pages/Ventes";
 import SubscriptionTypes from "./pages/SubscriptionTypes";
 import Prospection from "./pages/Prospection";
+import AbonnesCalendar from "./pages/AbonnesCalendar";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,11 @@ const App = () => (
           <Route path="/prospection" element={
             <AppLayout>
               <Prospection />
+            </AppLayout>
+          } />
+          <Route path="/calendrier" element={
+            <AppLayout>
+              <AbonnesCalendar />
             </AppLayout>
           } />
           <Route path="*" element={<NotFound />} />
