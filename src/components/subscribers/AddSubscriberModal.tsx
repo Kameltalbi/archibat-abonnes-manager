@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Dialog,
@@ -12,8 +12,10 @@ import { SubscriberForm } from './SubscriberForm';
 import { Plus } from 'lucide-react';
 
 export function AddSubscriberModal() {
+  const [open, setOpen] = useState(false);
+  
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
@@ -24,7 +26,7 @@ export function AddSubscriberModal() {
         <DialogHeader>
           <DialogTitle>Nouvel abonné</DialogTitle>
         </DialogHeader>
-        <SubscriberForm />
+        <SubscriberForm onClose={() => setOpen(false)} />
       </DialogContent>
     </Dialog>
   );

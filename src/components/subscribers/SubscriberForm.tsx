@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -31,68 +31,107 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@/components/ui/popover';
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, User, Mail, Phone, MapPin } from "lucide-react";
 import { cn } from '@/lib/utils';
+import { Textarea } from '@/components/ui/textarea';
 
 const formSchema = z.object({
-  nom: z.string().min(2, 'Le nom est requis'),
-  prenom: z.string().min(2, 'Le prénom est requis'),
-  email: z.string().email('Email invalide'),
-  telephone: z.string().min(8, 'Numéro de téléphone invalide'),
-  adresse: z.string().min(5, 'Adresse requise'),
-  ville: z.string().min(2, 'Ville requise'),
-  codePostal: z.string().min(4, 'Code postal requis'),
-  typeAbonnement: z.string().min(1, 'Veuillez sélectionner un type d\'abonnement'),
-  dateDebut: z.date(),
-  montant: z.string().min(1, 'Montant requis'),
-  statutPaiement: z.string().min(1, 'Statut de paiement requis'),
+  nomComplet: z.string().min(2, 'Le nom est requis'),
+  contact: z.string().optional(),
+  email: z.string().email('Email invalide').optional().or(z.literal('')),
+  telephone: z.string().optional(),
+  adresse: z.string().optional(),
+  ville: z.string().optional(),
+  codePostal: z.string().optional(),
+  pays: z.string().default('Tunisie'),
+  dateDebut: z.date({
+    required_error: "La date de début est requise",
+  }),
+  duree: z.string().min(1, 'La durée est requise'),
+  montant: z.number().min(0, 'Le montant doit être positif'),
+  modePaiement: z.string().min(1, 'Le mode de paiement est requis'),
+  commentaires: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function SubscriberForm() {
+const dureeOptions = [
+  { value: "12", label: "12 mois" },
+  { value: "24", label: "24 mois" },
+  { value: "36", label: "36 mois" },
+  { value: "custom", label: "Personnalisée" }
+];
+
+const modePaiementOptions = [
+  { value: "especes", label: "Espèces" },
+  { value: "cheque", label: "Chèque" },
+  { value: "virement", label: "Virement" },
+  { value: "enligne", label: "En ligne" }
+];
+
+// Prix mensuel par défaut pour calculer le montant
+const PRIX_MENSUEL = 10; // en DT
+
+export function SubscriberForm({ onClose }: { onClose?: () => void }) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nom: '',
-      prenom: '',
+      nomComplet: '',
+      contact: '',
       email: '',
       telephone: '',
       adresse: '',
       ville: '',
       codePostal: '',
-      typeAbonnement: '',
+      pays: 'Tunisie',
       dateDebut: new Date(),
-      montant: '',
-      statutPaiement: '',
+      duree: '12',
+      montant: 12 * PRIX_MENSUEL,
+      modePaiement: '',
+      commentaires: '',
     },
   });
+
+  // Calculer le montant en fonction de la durée sélectionnée
+  useEffect(() => {
+    const duree = form.watch('duree');
+    let montantCalcule = 0;
+    
+    if (duree === 'custom') {
+      montantCalcule = 0;
+    } else {
+      montantCalcule = parseInt(duree) * PRIX_MENSUEL;
+    }
+    
+    form.setValue('montant', montantCalcule);
+  }, [form.watch('duree')]);
 
   function onSubmit(data: FormValues) {
     console.log('Form submitted:', data);
     toast.success('Abonné ajouté avec succès!');
     form.reset();
+    if (onClose) onClose();
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div>
-          <h3 className="text-lg font-medium">Informations personnelles</h3>
-          <p className="text-sm text-muted-foreground">
-            Renseignez les informations de contact de l'abonné
-          </p>
+          <h3 className="text-lg font-medium">1. Informations de base</h3>
           <Separator className="my-4" />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
-              name="nom"
+              name="nomComplet"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nom</FormLabel>
+                  <FormLabel className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Nom complet / Raison sociale
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="Nom de l'abonné" {...field} />
+                    <Input placeholder="Nom complet ou raison sociale" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -101,12 +140,12 @@ export function SubscriberForm() {
             
             <FormField
               control={form.control}
-              name="prenom"
+              name="contact"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Prénom</FormLabel>
+                  <FormLabel>Contact</FormLabel>
                   <FormControl>
-                    <Input placeholder="Prénom de l'abonné" {...field} />
+                    <Input placeholder="Personne à contacter" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,7 +157,10 @@ export function SubscriberForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Email
+                  </FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="email@exemple.com" {...field} />
                   </FormControl>
@@ -132,7 +174,10 @@ export function SubscriberForm() {
               name="telephone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Téléphone</FormLabel>
+                  <FormLabel className="flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    Téléphone
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="+216 XX XXX XXX" {...field} />
                   </FormControl>
@@ -144,19 +189,18 @@ export function SubscriberForm() {
         </div>
         
         <div>
-          <h3 className="text-lg font-medium">Adresse</h3>
-          <p className="text-sm text-muted-foreground">
-            Renseignez l'adresse de livraison de l'abonné
-          </p>
-          <Separator className="my-4" />
+          <h4 className="text-md font-medium flex items-center gap-2">
+            <MapPin className="h-4 w-4" />
+            Adresse complète
+          </h4>
           
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-4 mt-4">
             <FormField
               control={form.control}
               name="adresse"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Adresse</FormLabel>
+                  <FormLabel>Rue</FormLabel>
                   <FormControl>
                     <Input placeholder="Rue, numéro, bâtiment..." {...field} />
                   </FormControl>
@@ -165,7 +209,7 @@ export function SubscriberForm() {
               )}
             />
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="ville"
@@ -193,51 +237,38 @@ export function SubscriberForm() {
                   </FormItem>
                 )}
               />
+              
+              <FormField
+                control={form.control}
+                name="pays"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Pays</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Pays" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
         </div>
         
         <div>
-          <h3 className="text-lg font-medium">Détails de l'abonnement</h3>
-          <p className="text-sm text-muted-foreground">
-            Configurez les détails de l'abonnement
-          </p>
+          <h3 className="text-lg font-medium">2. Abonnement</h3>
           <Separator className="my-4" />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField
               control={form.control}
-              name="typeAbonnement"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Type d'abonnement</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionnez un type d'abonnement" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="annuel">Annuel</SelectItem>
-                      <SelectItem value="semestriel">Semestriel</SelectItem>
-                      <SelectItem value="trimestriel">Trimestriel</SelectItem>
-                      <SelectItem value="etudiant">Étudiant</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
               name="dateDebut"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>Date de début</FormLabel>
+                  <FormLabel className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4" />
+                    Date de début d'abonnement
+                  </FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -274,15 +305,51 @@ export function SubscriberForm() {
             
             <FormField
               control={form.control}
+              name="duree"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Durée</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Sélectionnez une durée" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {dureeOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
               name="montant"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Montant (DT)</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} />
+                    <Input 
+                      type="number" 
+                      step="0.01" 
+                      {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value))}
+                      value={field.value}
+                      className="bg-muted/50" 
+                      disabled={form.watch('duree') !== 'custom'} 
+                    />
                   </FormControl>
                   <FormDescription>
-                    Montant en Dinar Tunisien
+                    Calculé automatiquement en fonction de la durée
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -291,23 +358,25 @@ export function SubscriberForm() {
             
             <FormField
               control={form.control}
-              name="statutPaiement"
+              name="modePaiement"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Statut du paiement</FormLabel>
+                  <FormLabel>Mode de paiement</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Statut du paiement" />
+                        <SelectValue placeholder="Sélectionnez un mode de paiement" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="paye">Payé</SelectItem>
-                      <SelectItem value="en_attente">En attente</SelectItem>
-                      <SelectItem value="annule">Annulé</SelectItem>
+                      {modePaiementOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -317,8 +386,34 @@ export function SubscriberForm() {
           </div>
         </div>
         
+        <div>
+          <h3 className="text-lg font-medium">3. Notes internes</h3>
+          <Separator className="my-4" />
+          
+          <FormField
+            control={form.control}
+            name="commentaires"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Commentaires internes</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Notes additionnelles (non visibles pour l'abonné)" 
+                    className="min-h-[100px]" 
+                    {...field} 
+                  />
+                </FormControl>
+                <FormDescription>
+                  Ces commentaires sont à usage interne uniquement
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        
         <div className="flex justify-end space-x-4">
-          <Button variant="outline" type="button">
+          <Button variant="outline" type="button" onClick={onClose}>
             Annuler
           </Button>
           <Button type="submit">Enregistrer l'abonné</Button>
