@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Archibat custom colors
+				archibat: {
+					blue: '#0057FF',  
+					violet: '#7F00FF', 
+					pink: '#FF4E8E',   
+					dark: '#333333',   
+					light: '#FFFFFF'   
 				}
 			},
 			borderRadius: {
