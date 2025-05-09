@@ -69,7 +69,7 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
         <SidebarGroup>
           {isOpen && <SidebarGroupLabel>Menu principal</SidebarGroupLabel>}
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-2"> {/* Ajout de l'espace vertical entre les éléments */}
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
