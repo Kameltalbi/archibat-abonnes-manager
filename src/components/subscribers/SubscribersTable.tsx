@@ -28,7 +28,6 @@ import {
   SearchIcon,
   ArrowDown,
   ArrowUp,
-  ArrowRight,
 } from 'lucide-react';
 
 export interface Subscriber {
@@ -120,19 +119,14 @@ export function SubscribersTable({ subscribers: initialSubscribers }: Subscriber
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="relative w-80">
-          <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher un abonné..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <Button onClick={() => navigate('/abonnes-locaux/nouveau')}>
-          Ajouter un abonné
-        </Button>
+      <div className="relative w-80">
+        <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Rechercher un abonné..."
+          className="pl-8"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       <div className="rounded-md border">
