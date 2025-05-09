@@ -43,7 +43,18 @@ export function AjouterVenteModal({ open, onOpenChange, onSubmit }: AjouterVente
   });
 
   const handleSubmit = (data: VenteFormData) => {
-    onSubmit(data);
+    // Ensure all required fields are present
+    const venteData: Omit<Vente, 'id'> = {
+      numero: data.numero,
+      quantite: data.quantite,
+      date: data.date,
+      client: data.client,
+      montant: data.montant,
+      modePaiement: data.modePaiement,
+      statut: data.statut
+    };
+    
+    onSubmit(venteData);
     form.reset();
   };
 
