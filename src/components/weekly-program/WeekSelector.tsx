@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { addWeeks, format, startOfWeek } from 'date-fns';
+import { addWeeks, format, startOfWeek, getISOWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
 interface WeekSelectorProps {
@@ -13,6 +13,9 @@ interface WeekSelectorProps {
 export const WeekSelector = ({ selectedWeek, onWeekChange }: WeekSelectorProps) => {
   // Calculate the start date of the selected week (Monday)
   const weekStart = startOfWeek(selectedWeek, { weekStartsOn: 1 });
+  
+  // Get the week number for the selected week
+  const weekNumber = getISOWeek(selectedWeek);
   
   // Go to previous week
   const goToPreviousWeek = () => {
@@ -42,7 +45,7 @@ export const WeekSelector = ({ selectedWeek, onWeekChange }: WeekSelectorProps) 
         </Button>
         
         <Button variant="outline" size="sm" onClick={goToCurrentWeek}>
-          Aujourd'hui
+          Semaine {weekNumber}
         </Button>
         
         <Button variant="outline" size="sm" onClick={goToNextWeek}>
