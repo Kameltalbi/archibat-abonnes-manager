@@ -1,17 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
-import { ProspectionTable, ProspectionItem } from '@/components/prospection/ProspectionTable';
+import { ProspectionItem } from '@/components/prospection/ProspectionTable';
 import { Button } from '@/components/ui/button';
 import { PlusIcon, PhoneCallIcon } from 'lucide-react';
 import { AddProspectionModal } from '@/components/prospection/AddProspectionModal';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ContactSelector, Contact } from '@/components/prospection/ContactSelector';
-import { AddSubscriberModal } from '@/components/subscribers/AddSubscriberModal';
+import { Contact } from '@/components/prospection/ContactSelector';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { ProspectionHistory } from '@/components/prospection/ProspectionHistory';
+import { ContactsTab } from '@/components/prospection/ContactsTab';
 
 const Prospection = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -24,74 +25,75 @@ const Prospection = () => {
   });
   
   useEffect(() => {
-    async function fetchProspectionData() {
-      try {
-        setLoading(prev => ({ ...prev, prospection: true }));
-        
-        const { data, error } = await supabase
-          .from('prospection')
-          .select('*')
-          .order('date', { ascending: false });
-          
-        if (error) throw error;
-        
-        const formattedData: ProspectionItem[] = data.map(item => ({
-          id: item.id,
-          contactName: item.contact_name,
-          date: item.date,
-          time: item.time,
-          type: item.type,
-          notes: item.notes || '',
-          result: item.result || ''
-        }));
-        
-        setProspectionData(formattedData);
-      } catch (error) {
-        console.error('Erreur lors du chargement des données de prospection:', error);
-        toast({
-          title: "Erreur de chargement",
-          description: "Impossible de charger les données de prospection",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(prev => ({ ...prev, prospection: false }));
-      }
-    }
-    
-    async function fetchContacts() {
-      try {
-        setLoading(prev => ({ ...prev, contacts: true }));
-        
-        const { data, error } = await supabase
-          .from('contacts')
-          .select('*')
-          .order('name');
-          
-        if (error) throw error;
-        
-        const formattedContacts: Contact[] = data.map(contact => ({
-          id: contact.id,
-          name: contact.name,
-          email: contact.email || '',
-          phone: contact.phone || ''
-        }));
-        
-        setContacts(formattedContacts);
-      } catch (error) {
-        console.error('Erreur lors du chargement des contacts:', error);
-        toast({
-          title: "Erreur de chargement",
-          description: "Impossible de charger les contacts",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(prev => ({ ...prev, contacts: false }));
-      }
-    }
-    
+    // Fetch prospection data and contacts
     fetchProspectionData();
     fetchContacts();
   }, []);
+
+  async function fetchProspectionData() {
+    try {
+      setLoading(prev => ({ ...prev, prospection: true }));
+      
+      const { data, error } = await supabase
+        .from('prospection')
+        .select('*')
+        .order('date', { ascending: false });
+        
+      if (error) throw error;
+      
+      const formattedData: ProspectionItem[] = data.map(item => ({
+        id: item.id,
+        contactName: item.contact_name,
+        date: item.date,
+        time: item.time,
+        type: item.type,
+        notes: item.notes || '',
+        result: item.result || ''
+      }));
+      
+      setProspectionData(formattedData);
+    } catch (error) {
+      console.error('Erreur lors du chargement des données de prospection:', error);
+      toast({
+        title: "Erreur de chargement",
+        description: "Impossible de charger les données de prospection",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(prev => ({ ...prev, prospection: false }));
+    }
+  }
+  
+  async function fetchContacts() {
+    try {
+      setLoading(prev => ({ ...prev, contacts: true }));
+      
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('*')
+        .order('name');
+        
+      if (error) throw error;
+      
+      const formattedContacts: Contact[] = data.map(contact => ({
+        id: contact.id,
+        name: contact.name,
+        email: contact.email || '',
+        phone: contact.phone || ''
+      }));
+      
+      setContacts(formattedContacts);
+    } catch (error) {
+      console.error('Erreur lors du chargement des contacts:', error);
+      toast({
+        title: "Erreur de chargement",
+        description: "Impossible de charger les contacts",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(prev => ({ ...prev, contacts: false }));
+    }
+  }
 
   const handleAddProspection = async (newProspection: Omit<ProspectionItem, 'id'>) => {
     try {
@@ -129,8 +131,6 @@ const Prospection = () => {
           description: "L'activité de prospection a été enregistrée avec succès",
         });
       }
-      
-      setIsAddModalOpen(false);
     } catch (error) {
       console.error('Erreur lors de l\'ajout de la prospection:', error);
       toast({
@@ -212,42 +212,16 @@ const Prospection = () => {
           
           <TabsContent value="historique">
             <Card className="bg-white rounded-lg border shadow p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-medium">Liste des actions de prospection</h2>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
-                    Cette semaine
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Ce mois
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Tout
-                  </Button>
-                </div>
-              </div>
-              
-              <ProspectionTable 
-                data={prospectionData}
-                onDelete={handleDeleteProspection}
+              <ProspectionHistory 
+                data={prospectionData} 
+                onDelete={handleDeleteProspection} 
               />
             </Card>
           </TabsContent>
           
           <TabsContent value="contacts">
             <Card className="bg-white rounded-lg border shadow p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-medium">Contacts à prospecter</h2>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="flex items-center gap-2">
-                    <PlusIcon className="h-4 w-4" />
-                    Nouveau contact
-                  </Button>
-                  <AddSubscriberModal />
-                </div>
-              </div>
-              
-              <ContactSelector 
+              <ContactsTab 
                 contacts={contacts} 
                 onSelectContact={handleSelectContact} 
               />
