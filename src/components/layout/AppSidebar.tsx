@@ -27,6 +27,8 @@ import {
   LogOutIcon,
   PhoneCallIcon
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface AppSidebarProps {
   isOpen: boolean;
@@ -45,6 +47,35 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
     { title: "Programme de travail", icon: ListIcon, url: "/programme" },
     { title: "Paramètres", icon: SettingsIcon, url: "/parametres" }
   ];
+
+  const handleLogout = async () => {
+    try {
+      // Nettoyer les états d'authentification dans le stockage local
+      const keysToRemove = Object.keys(localStorage).filter(key => 
+        key.startsWith('supabase.auth.') || key.includes('sb-')
+      );
+      
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      // Essayer de déconnecter l'utilisateur globalement
+      await supabase.auth.signOut({ scope: 'global' });
+      
+      toast({
+        title: "Déconnexion réussie",
+        description: "Vous avez été déconnecté avec succès",
+      });
+      
+      // Rediriger vers la page d'accueil avec un rafraîchissement forcé pour mettre à jour l'état d'authentification
+      window.location.href = '/';
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+      toast({
+        title: "Erreur de déconnexion",
+        description: "Une erreur s'est produite lors de la tentative de déconnexion",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Sidebar className={cn(
@@ -103,6 +134,7 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
             "flex items-center w-full py-2.5 px-3 rounded-md transition-colors hover:bg-destructive/10 hover:text-destructive text-[#1E293B] font-medium",
             isOpen ? "justify-start" : "justify-center"
           )}
+          onClick={handleLogout}
         >
           <LogOutIcon className={cn("h-5 w-5", isOpen ? "mr-3" : "")} />
           {isOpen && <span className="text-base">Se déconnecter</span>}
