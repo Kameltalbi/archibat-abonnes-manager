@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -16,13 +15,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { CalendarIcon, UserIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface Contact {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-}
+import { Contact } from './ContactSelector';
 
 interface AddProspectionModalProps {
   open: boolean;
