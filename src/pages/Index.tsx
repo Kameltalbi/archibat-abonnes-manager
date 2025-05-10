@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckIcon, DownloadIcon, FileTextIcon, UserIcon, MailIcon, SettingsIcon } from 'lucide-react';
 import { HomeHeader } from '@/components/layout/HomeHeader';
+import { LoginDialog } from '@/components/auth/LoginDialog';
 
 const Index = () => {
   return (
@@ -16,9 +16,7 @@ const Index = () => {
         <div className="container mx-auto text-center px-4">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">Bienvenue sur votre espace pro Archibat</h1>
           <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto text-gray-700">Gérez vos abonnements, vos contenus et vos services digitaux</p>
-          <Button asChild className="text-lg px-8 py-6 h-auto bg-archibat-blue hover:bg-archibat-blue/80">
-            <Link to="/dashboard">Se connecter</Link>
-          </Button>
+          <LoginDialog className="text-lg px-8 py-6 h-auto bg-archibat-blue hover:bg-archibat-blue/80" />
         </div>
       </section>
 

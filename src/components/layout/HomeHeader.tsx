@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuLink, NavigationMenuList, NavigationMenuTrigger } from '@/components/ui/navigation-menu';
-import { SettingsIcon, DollarSignIcon, MailIcon, LogInIcon } from 'lucide-react';
+import { SettingsIcon, DollarSignIcon, MailIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { LoginDialog } from '@/components/auth/LoginDialog';
 
 export function HomeHeader() {
   return (
@@ -90,12 +90,7 @@ export function HomeHeader() {
           </NavigationMenu>
         </div>
         
-        <Button asChild className="bg-archibat-blue hover:bg-archibat-violet">
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <LogInIcon className="h-4 w-4" />
-            <span>Se connecter</span>
-          </Link>
-        </Button>
+        <LoginDialog className="bg-archibat-blue hover:bg-archibat-violet" />
       </div>
     </header>
   );
