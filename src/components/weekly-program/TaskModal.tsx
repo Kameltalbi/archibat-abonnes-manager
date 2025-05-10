@@ -1,36 +1,28 @@
 
-import React from 'react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { WeeklyTask } from '@/pages/WeeklyProgram';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
+  DialogTitle,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+} from "@/components/ui/dialog";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/select";
+import { format, addDays, startOfWeek } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2 } from 'lucide-react';
+import { WeeklyTask } from '@/pages/WeeklyProgram';
 
 interface TaskModalProps {
   open: boolean;
@@ -41,185 +33,180 @@ interface TaskModalProps {
   selectedDayIndex: number | null;
 }
 
-// Form schema
-const taskFormSchema = z.object({
-  dayIndex: z.string().refine((val) => !isNaN(Number(val)), {
-    message: "Veuillez sélectionner un jour",
-  }),
-  startTime: z.string().min(1, "L'heure de début est requise"),
-  endTime: z.string().min(1, "L'heure de fin est requise"),
-  title: z.string().min(1, "Le titre est requis"),
-  location: z.string().optional(),
-});
-
-type TaskFormValues = z.infer<typeof taskFormSchema>;
-
 export const TaskModal = ({
   open,
   onOpenChange,
-  onSave,
   task,
   weekDays,
   selectedDayIndex,
 }: TaskModalProps) => {
-  const form = useForm<TaskFormValues>({
-    resolver: zodResolver(taskFormSchema),
-    defaultValues: {
-      dayIndex: selectedDayIndex !== null ? String(selectedDayIndex) : "",
-      startTime: task?.startTime || "",
-      endTime: task?.endTime || "",
-      title: task?.title || "",
-      location: task?.location || "",
-    },
-  });
+  const [title, setTitle] = useState('');
+  const [dayIndex, setDayIndex] = useState<number>(0);
+  const [startTime, setStartTime] = useState('09:00');
+  const [endTime, setEndTime] = useState('10:00');
+  const [location, setLocation] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const { toast } = useToast();
 
-  // Reset form when modal opens or selected task changes
-  React.useEffect(() => {
-    if (open) {
-      form.reset({
-        dayIndex: task?.dayIndex !== undefined ? String(task.dayIndex) : selectedDayIndex !== null ? String(selectedDayIndex) : "",
-        startTime: task?.startTime || "",
-        endTime: task?.endTime || "",
-        title: task?.title || "",
-        location: task?.location || "",
-      });
+  // Set initial values when modal opens
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title);
+      setDayIndex(task.dayIndex);
+      setStartTime(task.startTime);
+      setEndTime(task.endTime);
+      setLocation(task.location || '');
+    } else {
+      setTitle('');
+      setDayIndex(selectedDayIndex !== null ? selectedDayIndex : 0);
+      setStartTime('09:00');
+      setEndTime('10:00');
+      setLocation('');
     }
-  }, [open, task, selectedDayIndex, form]);
+  }, [open, task, selectedDayIndex]);
 
-  function onSubmit(data: TaskFormValues) {
-    const dayIndex = parseInt(data.dayIndex);
-    
-    onSave({
-      dayIndex,
-      date: weekDays[dayIndex],
-      startTime: data.startTime,
-      endTime: data.endTime,
-      title: data.title,
-      location: data.location,
-    });
-    
-    onOpenChange(false);
-  }
+  const handleSave = async () => {
+    if (!title.trim()) {
+      toast({
+        title: "Titre requis",
+        description: "Veuillez entrer un titre pour cette tâche.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const selectedDate = weekDays[dayIndex];
+      
+      const taskData = {
+        title,
+        day_index: dayIndex,
+        date: format(selectedDate, 'yyyy-MM-dd'),
+        start_time: startTime,
+        end_time: endTime,
+        location: location || null
+      };
+      
+      if (task?.id) {
+        // Update existing task
+        const { error } = await supabase
+          .from('weekly_tasks')
+          .update(taskData)
+          .eq('id', task.id);
+          
+        if (error) throw error;
+        
+        toast({
+          title: "Tâche modifiée",
+          description: "La tâche a été modifiée avec succès.",
+        });
+      } else {
+        // Insert new task
+        const { error } = await supabase
+          .from('weekly_tasks')
+          .insert([taskData]);
+          
+        if (error) throw error;
+        
+        toast({
+          title: "Tâche ajoutée",
+          description: "La tâche a été ajoutée avec succès.",
+        });
+      }
+      
+      onOpenChange(false);
+      window.location.reload(); // Refresh to show updated data
+    } catch (error: any) {
+      console.error('Error saving task:', error);
+      toast({
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue lors de l'enregistrement",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{task ? 'Modifier' : 'Ajouter'} une tâche</DialogTitle>
-          <DialogDescription>
-            Complétez les informations ci-dessous pour {task ? 'modifier' : 'créer'} une tâche dans votre programme.
-          </DialogDescription>
+          <DialogTitle>{task ? 'Modifier la tâche' : 'Ajouter une tâche'}</DialogTitle>
         </DialogHeader>
         
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            {/* Day field */}
-            <FormField
-              control={form.control}
-              name="dayIndex"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Jour</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionnez un jour" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {weekDays.map((day, index) => (
-                        <SelectItem key={index} value={index.toString()}>
-                          {format(day, "EEEE d MMMM", { locale: fr })}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="title">Titre</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Titre de la tâche"
             />
-            
-            {/* Time fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="startTime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Heure de début</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="time" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="endTime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Heure de fin</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="time" 
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="day">Jour</Label>
+            <Select value={dayIndex.toString()} onValueChange={(value) => setDayIndex(parseInt(value))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner un jour" />
+              </SelectTrigger>
+              <SelectContent>
+                {weekDays.map((day, index) => (
+                  <SelectItem key={index} value={index.toString()}>
+                    {format(day, 'EEEE d MMMM', { locale: fr })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="startTime">Heure de début</Label>
+              <Input
+                id="startTime"
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
               />
             </div>
             
-            {/* Title field */}
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Intitulé</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Titre de la tâche" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <div className="grid gap-2">
+              <Label htmlFor="endTime">Heure de fin</Label>
+              <Input
+                id="endTime"
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="location">Lieu (optionnel)</Label>
+            <Input
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Lieu de la tâche"
             />
-            
-            {/* Location field */}
-            <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Lieu ou note (optionnel)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Lieu ou note complémentaire" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <DialogFooter className="mt-6">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Annuler
-              </Button>
-              <Button type="submit">
-                {task ? 'Modifier' : 'Ajouter'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+          </div>
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+            Annuler
+          </Button>
+          <Button onClick={handleSave} disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Enregistrer
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

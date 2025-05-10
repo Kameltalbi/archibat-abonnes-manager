@@ -1,15 +1,16 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Button } from '@/components/ui/button';
-import { PlusIcon, CalendarDaysIcon, Copy } from 'lucide-react';
+import { PlusIcon, CalendarDaysIcon, Copy, Loader2 } from 'lucide-react';
 import { WeekSelector } from '@/components/weekly-program/WeekSelector';
 import { WeeklyGrid } from '@/components/weekly-program/WeeklyGrid';
 import { TaskModal } from '@/components/weekly-program/TaskModal';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/components/ui/use-toast';
-import { addDays, startOfWeek, endOfWeek, format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
+import { addDays, startOfWeek, endOfWeek, format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { supabase } from '@/integrations/supabase/client';
 
 export type WeeklyTask = {
   id: string;
@@ -26,30 +27,10 @@ const WeeklyProgram = () => {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<WeeklyTask | null>(null);
   const [selectedDayIndex, setSelectedDayIndex] = useState<number | null>(null);
+  const [tasks, setTasks] = useState<WeeklyTask[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   
-  // Sample initial tasks (would normally come from a database)
-  const [tasks, setTasks] = useState<WeeklyTask[]>([
-    {
-      id: '1',
-      dayIndex: 0,
-      date: startOfWeek(new Date(), { weekStartsOn: 1 }),
-      startTime: '09:00',
-      endTime: '10:30',
-      title: 'Réunion équipe',
-      location: 'Bureau principal'
-    },
-    {
-      id: '2',
-      dayIndex: 2,
-      date: addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), 2),
-      startTime: '14:00',
-      endTime: '15:00',
-      title: 'Appel client',
-      location: 'Téléphone'
-    }
-  ]);
-
   // Get week dates (Mon-Sun) based on selectedWeek
   const getWeekDays = (date: Date) => {
     const start = startOfWeek(date, { weekStartsOn: 1 });
@@ -57,6 +38,53 @@ const WeeklyProgram = () => {
   };
   
   const weekDays = getWeekDays(selectedWeek);
+
+  // Fetch tasks from Supabase
+  const fetchTasks = async () => {
+    setIsLoading(true);
+    
+    try {
+      // Calculate week start and end dates for filtering
+      const weekStart = format(startOfWeek(selectedWeek, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+      const weekEnd = format(addDays(startOfWeek(selectedWeek, { weekStartsOn: 1 }), 6), 'yyyy-MM-dd');
+      
+      const { data, error } = await supabase
+        .from('weekly_tasks')
+        .select('*')
+        .gte('date', weekStart)
+        .lte('date', weekEnd);
+        
+      if (error) throw error;
+      
+      if (data) {
+        const mappedTasks: WeeklyTask[] = data.map(task => ({
+          id: task.id,
+          dayIndex: task.day_index,
+          date: parseISO(task.date),
+          startTime: task.start_time,
+          endTime: task.end_time,
+          title: task.title,
+          location: task.location
+        }));
+        
+        setTasks(mappedTasks);
+      }
+    } catch (error: any) {
+      console.error('Error fetching tasks:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de récupérer les tâches",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Fetch tasks when selected week changes
+  useEffect(() => {
+    fetchTasks();
+  }, [selectedWeek]);
 
   // Handle opening the task modal
   const handleAddTask = (dayIndex: number) => {
@@ -73,36 +101,35 @@ const WeeklyProgram = () => {
   };
 
   // Handle deleting a task
-  const handleDeleteTask = (taskId: string) => {
-    setTasks(tasks.filter(task => task.id !== taskId));
-    toast({
-      title: "Tâche supprimée",
-      description: "La tâche a été supprimée avec succès.",
-    });
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      const { error } = await supabase
+        .from('weekly_tasks')
+        .delete()
+        .eq('id', taskId);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Tâche supprimée",
+        description: "La tâche a été supprimée avec succès.",
+      });
+      
+      fetchTasks(); // Refresh tasks
+    } catch (error: any) {
+      console.error('Error deleting task:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer la tâche",
+        variant: "destructive",
+      });
+    }
   };
 
   // Handle saving a task (new or edited)
   const handleSaveTask = (task: Omit<WeeklyTask, 'id'>) => {
-    if (editingTask) {
-      // Update existing task
-      setTasks(tasks.map(t => t.id === editingTask.id ? { ...task, id: editingTask.id } : t));
-      toast({
-        title: "Tâche modifiée",
-        description: "La tâche a été modifiée avec succès.",
-      });
-    } else {
-      // Add new task
-      const newTask = {
-        ...task,
-        id: Math.random().toString(36).substring(7),
-      };
-      setTasks([...tasks, newTask]);
-      toast({
-        title: "Tâche ajoutée",
-        description: "La tâche a été ajoutée avec succès.",
-      });
-    }
-    setIsTaskModalOpen(false);
+    // TaskModal now handles saving directly to Supabase
+    fetchTasks();
   };
 
   // Handle duplicating a previous week
@@ -114,15 +141,6 @@ const WeeklyProgram = () => {
       description: "La duplication de semaine sera disponible prochainement.",
     });
   };
-
-  // Filter tasks for the selected week
-  const weekStart = startOfWeek(selectedWeek, { weekStartsOn: 1 });
-  const weekEnd = endOfWeek(selectedWeek, { weekStartsOn: 1 });
-  
-  const currentWeekTasks = tasks.filter(task => {
-    const taskDate = new Date(task.date);
-    return taskDate >= weekStart && taskDate <= weekEnd;
-  });
 
   return (
     <div className="container mx-auto">
@@ -157,13 +175,19 @@ const WeeklyProgram = () => {
             />
           </div>
           
-          <WeeklyGrid 
-            weekDays={weekDays}
-            tasks={currentWeekTasks}
-            onAddTask={handleAddTask}
-            onEditTask={handleEditTask}
-            onDeleteTask={handleDeleteTask}
-          />
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-archibat-blue" />
+            </div>
+          ) : (
+            <WeeklyGrid 
+              weekDays={weekDays}
+              tasks={tasks}
+              onAddTask={handleAddTask}
+              onEditTask={handleEditTask}
+              onDeleteTask={handleDeleteTask}
+            />
+          )}
         </div>
       </div>
 

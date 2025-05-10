@@ -9,13 +9,561 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      calendar_events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date: string
+          description: string | null
+          end_time: string
+          id: string
+          location: string | null
+          start_time: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date: string
+          description?: string | null
+          end_time: string
+          id?: string
+          location?: string | null
+          start_time: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          description?: string | null
+          end_time?: string
+          id?: string
+          location?: string | null
+          start_time?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      contacts: {
+        Row: {
+          company: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      institutions: {
+        Row: {
+          adresse: string | null
+          contact: string | null
+          created_at: string
+          created_by: string | null
+          date_adhesion: string | null
+          email: string | null
+          id: string
+          nom: string
+          statut: string
+          telephone: string | null
+          type: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          adresse?: string | null
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_adhesion?: string | null
+          email?: string | null
+          id?: string
+          nom: string
+          statut: string
+          telephone?: string | null
+          type: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          adresse?: string | null
+          contact?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_adhesion?: string | null
+          email?: string | null
+          id?: string
+          nom?: string
+          statut?: string
+          telephone?: string | null
+          type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      international_subscribers: {
+        Row: {
+          adresse: string | null
+          code_postal: string | null
+          created_at: string
+          created_by: string | null
+          date_debut: string
+          date_fin: string
+          devise: string | null
+          email: string
+          id: string
+          montant: number
+          nom: string
+          pays: string
+          prenom: string
+          statut: string
+          telephone: string | null
+          type_abonnement_id: string | null
+          updated_at: string
+          updated_by: string | null
+          ville: string | null
+        }
+        Insert: {
+          adresse?: string | null
+          code_postal?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut: string
+          date_fin: string
+          devise?: string | null
+          email: string
+          id?: string
+          montant: number
+          nom: string
+          pays: string
+          prenom: string
+          statut: string
+          telephone?: string | null
+          type_abonnement_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          ville?: string | null
+        }
+        Update: {
+          adresse?: string | null
+          code_postal?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          date_fin?: string
+          devise?: string | null
+          email?: string
+          id?: string
+          montant?: number
+          nom?: string
+          pays?: string
+          prenom?: string
+          statut?: string
+          telephone?: string | null
+          type_abonnement_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          ville?: string | null
+        }
+        Relationships: []
+      }
+      local_subscribers: {
+        Row: {
+          adresse: string | null
+          code_postal: string | null
+          created_at: string
+          created_by: string | null
+          date_debut: string
+          date_fin: string
+          email: string
+          id: string
+          montant: number
+          nom: string
+          prenom: string
+          statut: string
+          telephone: string | null
+          type_abonnement_id: string | null
+          updated_at: string
+          updated_by: string | null
+          ville: string | null
+        }
+        Insert: {
+          adresse?: string | null
+          code_postal?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut: string
+          date_fin: string
+          email: string
+          id?: string
+          montant: number
+          nom: string
+          prenom: string
+          statut: string
+          telephone?: string | null
+          type_abonnement_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          ville?: string | null
+        }
+        Update: {
+          adresse?: string | null
+          code_postal?: string | null
+          created_at?: string
+          created_by?: string | null
+          date_debut?: string
+          date_fin?: string
+          email?: string
+          id?: string
+          montant?: number
+          nom?: string
+          prenom?: string
+          statut?: string
+          telephone?: string | null
+          type_abonnement_id?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          ville?: string | null
+        }
+        Relationships: []
+      }
+      permissions: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          key: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          key: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          key?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          role_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          role_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          role_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prospection: {
+        Row: {
+          contact_name: string
+          created_at: string
+          created_by: string | null
+          date: string
+          id: string
+          notes: string | null
+          result: string | null
+          time: string
+          type: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          contact_name: string
+          created_at?: string
+          created_by?: string | null
+          date: string
+          id?: string
+          notes?: string | null
+          result?: string | null
+          time: string
+          type: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          contact_name?: string
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          id?: string
+          notes?: string | null
+          result?: string | null
+          time?: string
+          type?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission_id: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission_id: string
+          role_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission_id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      subscription_types: {
+        Row: {
+          actif: boolean | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          duree: number
+          id: string
+          nom: string
+          prix: number
+          type_lecteur: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          actif?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duree: number
+          id?: string
+          nom: string
+          prix: number
+          type_lecteur: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          actif?: boolean | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          duree?: number
+          id?: string
+          nom?: string
+          prix?: number
+          type_lecteur?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      ventes: {
+        Row: {
+          client: string
+          created_at: string
+          created_by: string | null
+          date: string
+          id: string
+          mode_paiement: string
+          montant: number
+          numero: string
+          quantite: number
+          statut: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          client: string
+          created_at?: string
+          created_by?: string | null
+          date: string
+          id?: string
+          mode_paiement: string
+          montant: number
+          numero: string
+          quantite: number
+          statut: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          client?: string
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          id?: string
+          mode_paiement?: string
+          montant?: number
+          numero?: string
+          quantite?: number
+          statut?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      weekly_tasks: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date: string
+          day_index: number
+          end_time: string
+          id: string
+          location: string | null
+          start_time: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date: string
+          day_index: number
+          end_time: string
+          id?: string
+          location?: string | null
+          start_time: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          day_index?: number
+          end_time?: string
+          id?: string
+          location?: string | null
+          start_time?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: string
+      }
+      has_permission: {
+        Args: { user_id: string; permission_key: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

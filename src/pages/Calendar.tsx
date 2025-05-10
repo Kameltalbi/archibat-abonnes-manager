@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Button } from '@/components/ui/button';
-import { PlusIcon, CalendarDaysIcon, MapPinIcon, ClockIcon } from 'lucide-react';
+import { PlusIcon, CalendarDaysIcon, MapPinIcon, ClockIcon, Loader2 } from 'lucide-react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import {
   Card,
@@ -10,61 +10,123 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { format } from 'date-fns';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
-
-// Mock events for demonstration
-const mockEvents = [
-  {
-    id: '1',
-    title: 'Réunion avec les partenaires',
-    date: new Date(2025, 4, 10),
-    startTime: '09:00',
-    endTime: '10:30',
-    location: 'Salle de conférence A',
-    description: 'Discussion sur les nouveaux projets',
-  },
-  {
-    id: '2',
-    title: 'Formation Archibat',
-    date: new Date(2025, 4, 10),
-    startTime: '14:00',
-    endTime: '16:00',
-    location: 'Centre de formation',
-    description: 'Formation sur les nouveaux outils',
-  },
-  {
-    id: '3',
-    title: 'Rendez-vous client',
-    date: new Date(2025, 4, 12),
-    startTime: '11:00',
-    endTime: '12:00',
-    location: 'Bureau 305',
-    description: 'Présentation des nouveaux services',
-  },
-  {
-    id: '4',
-    title: 'Webinaire marketing',
-    date: new Date(2025, 4, 15),
-    startTime: '15:00',
-    endTime: '16:30',
-    location: 'En ligne',
-    description: 'Stratégies de marketing digital',
-  },
-];
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { CalendarEventModal, CalendarEvent } from '@/components/calendar/CalendarEventModal';
 
 const Calendar = () => {
-  const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
+  const [eventToEdit, setEventToEdit] = useState<CalendarEvent | undefined>(undefined);
+  const [eventToDelete, setEventToDelete] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  // Fetch events from Supabase
+  const fetchEvents = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('calendar_events')
+        .select('*');
+
+      if (error) throw error;
+
+      if (data) {
+        const mappedEvents: CalendarEvent[] = data.map(event => ({
+          id: event.id,
+          title: event.title,
+          date: parseISO(event.date),
+          startTime: event.start_time,
+          endTime: event.end_time,
+          location: event.location,
+          description: event.description
+        }));
+        
+        setEvents(mappedEvents);
+      }
+    } catch (error: any) {
+      console.error('Error fetching events:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de récupérer les événements",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
 
   // Filter events for the selected date
   const eventsForSelectedDate = date 
-    ? mockEvents.filter(event => 
+    ? events.filter(event => 
         event.date.getDate() === date.getDate() &&
         event.date.getMonth() === date.getMonth() &&
         event.date.getFullYear() === date.getFullYear()
       )
     : [];
+
+  // Handle adding a new event
+  const handleAddEvent = () => {
+    setEventToEdit(undefined);
+    setIsAddEventModalOpen(true);
+  };
+
+  // Handle editing an event
+  const handleEditEvent = (event: CalendarEvent) => {
+    setEventToEdit(event);
+    setIsAddEventModalOpen(true);
+  };
+
+  // Handle deleting an event
+  const handleDeleteEvent = async () => {
+    if (!eventToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('calendar_events')
+        .delete()
+        .eq('id', eventToDelete);
+
+      if (error) throw error;
+
+      toast({
+        title: "Événement supprimé",
+        description: "L'événement a été supprimé avec succès",
+      });
+
+      fetchEvents();
+    } catch (error: any) {
+      console.error('Error deleting event:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer l'événement",
+        variant: "destructive",
+      });
+    } finally {
+      setEventToDelete(null);
+    }
+  };
+
+  // Get dates with events for highlighting in the calendar
+  const datesWithEvents = events.map(event => event.date);
 
   return (
     <div className="container mx-auto">
@@ -74,7 +136,7 @@ const Calendar = () => {
         icon={<CalendarDaysIcon className="h-6 w-6 text-archibat-blue" />}
       >
         <Button 
-          onClick={() => setIsAddEventModalOpen(true)}
+          onClick={handleAddEvent}
           className="flex items-center gap-1"
         >
           <PlusIcon className="h-4 w-4" />
@@ -94,7 +156,7 @@ const Calendar = () => {
                 mode="single"
                 selected={date}
                 onSelect={setDate}
-                className="rounded-md border p-3"
+                className="rounded-md border p-3 pointer-events-auto"
                 classNames={{
                   month: "space-y-4 w-full",
                   caption: "flex justify-center pt-1 relative items-center mb-4",
@@ -108,6 +170,16 @@ const Calendar = () => {
                 fixedWeeks
                 showOutsideDays
                 locale={fr}
+                modifiers={{
+                  hasEvent: (date) => datesWithEvents.some(eventDate => 
+                    eventDate.getDate() === date.getDate() &&
+                    eventDate.getMonth() === date.getMonth() &&
+                    eventDate.getFullYear() === date.getFullYear()
+                  )
+                }}
+                modifiersClassNames={{
+                  hasEvent: "border-2 border-archibat-blue"
+                }}
               />
             </CardContent>
           </Card>
@@ -126,17 +198,30 @@ const Calendar = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {eventsForSelectedDate.length > 0 ? (
+              {isLoading ? (
+                <div className="flex items-center justify-center py-10">
+                  <Loader2 className="h-8 w-8 animate-spin text-archibat-blue" />
+                </div>
+              ) : eventsForSelectedDate.length > 0 ? (
                 <div className="space-y-4">
                   {eventsForSelectedDate.map((event) => (
                     <div key={event.id} className="border rounded-lg p-4 hover:bg-accent/10 transition-colors">
                       <div className="flex items-center justify-between">
                         <h3 className="font-medium text-lg">{event.title}</h3>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditEvent(event)}
+                          >
                             Modifier
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-50">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                            onClick={() => setEventToDelete(event.id)}
+                          >
                             Supprimer
                           </Button>
                         </div>
@@ -148,10 +233,12 @@ const Calendar = () => {
                           {event.startTime} - {event.endTime}
                         </div>
                         
-                        <div className="flex items-center">
-                          <MapPinIcon className="h-4 w-4 mr-2" />
-                          {event.location}
-                        </div>
+                        {event.location && (
+                          <div className="flex items-center">
+                            <MapPinIcon className="h-4 w-4 mr-2" />
+                            {event.location}
+                          </div>
+                        )}
                         
                         {event.description && (
                           <p className="mt-2 text-sm">{event.description}</p>
@@ -167,7 +254,7 @@ const Calendar = () => {
                   <Button 
                     variant="outline" 
                     className="mt-4"
-                    onClick={() => setIsAddEventModalOpen(true)}
+                    onClick={handleAddEvent}
                   >
                     <PlusIcon className="h-4 w-4 mr-2" />
                     Ajouter un événement
@@ -179,78 +266,35 @@ const Calendar = () => {
         </div>
       </div>
 
-      {/* Add Event Modal */}
-      {isAddEventModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4">Ajouter un événement</h2>
-            <form>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Titre</label>
-                  <input 
-                    type="text" 
-                    className="w-full p-2 border rounded-md" 
-                    placeholder="Titre de l'événement"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Date</label>
-                  <input 
-                    type="date" 
-                    className="w-full p-2 border rounded-md" 
-                    defaultValue={date ? format(date, "yyyy-MM-dd") : undefined}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Heure de début</label>
-                    <input 
-                      type="time" 
-                      className="w-full p-2 border rounded-md" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Heure de fin</label>
-                    <input 
-                      type="time" 
-                      className="w-full p-2 border rounded-md" 
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Lieu</label>
-                  <input 
-                    type="text" 
-                    className="w-full p-2 border rounded-md" 
-                    placeholder="Lieu de l'événement"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Description</label>
-                  <textarea 
-                    className="w-full p-2 border rounded-md" 
-                    rows={3}
-                    placeholder="Description de l'événement"
-                  />
-                </div>
-                <div className="flex justify-end space-x-2 pt-4">
-                  <Button
-                    variant="outline"
-                    type="button"
-                    onClick={() => setIsAddEventModalOpen(false)}
-                  >
-                    Annuler
-                  </Button>
-                  <Button type="button">
-                    Ajouter
-                  </Button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Add/Edit Event Modal */}
+      <CalendarEventModal
+        isOpen={isAddEventModalOpen}
+        onClose={() => setIsAddEventModalOpen(false)}
+        selectedDate={date}
+        event={eventToEdit}
+        onEventUpdated={fetchEvents}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!eventToDelete} onOpenChange={(open) => !open && setEventToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer cet événement ? Cette action ne peut pas être annulée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteEvent}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
