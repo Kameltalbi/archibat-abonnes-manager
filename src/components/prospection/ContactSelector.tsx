@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { PhoneCall } from 'lucide-react';
 
 export interface Contact {
-  id: string | number; // Changed from "string | number" to match expected type
+  id: string;  // Changed to just string to match how IDs are stored in Supabase
   name: string;
   email: string;
   phone: string;
@@ -37,7 +37,7 @@ export function ContactSelector({ contacts, onSelectContact }: ContactSelectorPr
             </TableRow>
           ) : (
             contacts.map((contact) => (
-              <TableRow key={typeof contact.id === 'number' ? contact.id.toString() : contact.id}>
+              <TableRow key={contact.id}>
                 <TableCell className="font-medium">{contact.name}</TableCell>
                 <TableCell>{contact.email}</TableCell>
                 <TableCell>{contact.phone}</TableCell>

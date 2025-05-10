@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 
 export interface ProspectionItem {
-  id: string | number;
+  id: string;  // Changed to just string to match Supabase UUIDs
   contactName: string;
   date: string;
   time: string;
@@ -17,7 +17,7 @@ export interface ProspectionItem {
 
 interface ProspectionTableProps {
   data: ProspectionItem[];
-  onDelete: (id: string | number) => void;
+  onDelete: (id: string) => void;
 }
 
 export function ProspectionTable({ data, onDelete }: ProspectionTableProps) {
