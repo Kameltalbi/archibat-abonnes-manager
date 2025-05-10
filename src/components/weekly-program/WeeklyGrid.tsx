@@ -119,7 +119,7 @@ export const WeeklyGrid = ({
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-8 w-8" {/* Augmenté la taille des boutons */}
+                            className="h-8 w-8" 
                             onClick={() => onEditTask(task)}
                           >
                             <Edit className="h-4 w-4" />
@@ -138,7 +138,7 @@ export const WeeklyGrid = ({
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50" {/* Augmenté la taille des boutons */}
+                            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50" 
                             onClick={() => handleDeleteClick(task.id)}
                           >
                             <Trash className="h-4 w-4" />
