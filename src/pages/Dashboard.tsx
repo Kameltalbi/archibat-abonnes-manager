@@ -1,72 +1,206 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { StatCard } from '@/components/dashboard/StatCard';
 import { RecentSubscribers } from '@/components/dashboard/RecentSubscribers';
 import { SubscriptionsChart } from '@/components/dashboard/SubscriptionsChart';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
 import { UserIcon, UsersIcon, ShoppingCartIcon, DollarSignIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+
+interface SubscriberCount {
+  locaux: number;
+  internationaux: number;
+  institutions: number;
+  ventes: number;
+  chiffreAffaires: number;
+}
+
+interface ChartData {
+  month: string;
+  locaux: number;
+  internationaux: number;
+  institutions: number;
+}
+
+interface Subscriber {
+  id: string;
+  name: string;
+  email: string;
+  type: string;
+  status: 'active' | 'pending' | 'expired';
+  date: string;
+}
+
+interface Event {
+  id: string;
+  title: string;
+  date: string;
+  time: string;
+  type: 'meeting' | 'deadline' | 'task';
+}
 
 const Dashboard = () => {
-  // Mock data for dashboard
-  const statsData = [
-    { 
-      title: "Abonnés locaux", 
-      value: "245", 
-      icon: <UserIcon className="h-5 w-5" />,
-      change: { value: "12%", positive: true } 
-    },
-    { 
-      title: "Abonnés internationaux", 
-      value: "78", 
-      icon: <UserIcon className="h-5 w-5" />,
-      change: { value: "5%", positive: true } 
-    },
-    { 
-      title: "Institutions", 
-      value: "42", 
-      icon: <UsersIcon className="h-5 w-5" />,
-      change: { value: "3%", positive: false } 
-    },
-    { 
-      title: "Ventes au numéro", 
-      value: "320", 
-      icon: <ShoppingCartIcon className="h-5 w-5" />,
-      change: { value: "10%", positive: true } 
-    },
-    {
-      title: "Chiffre d'affaires (DT)", 
-      value: "32 850", 
-      icon: <DollarSignIcon className="h-5 w-5" />, 
-      change: { value: "8%", positive: true }
+  const [statsData, setStatsData] = useState<any[]>([]);
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [recentSubscribers, setRecentSubscribers] = useState<Subscriber[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        setLoading(true);
+
+        // Récupérer les statistiques d'abonnés
+        const { data: locauxData, error: locauxError } = await supabase
+          .from('local_subscribers')
+          .select('count')
+          .eq('statut', 'actif');
+
+        const { data: internatData, error: internatError } = await supabase
+          .from('international_subscribers')
+          .select('count')
+          .eq('statut', 'actif');
+
+        const { data: institutionsData, error: institutionsError } = await supabase
+          .from('institutions')
+          .select('count')
+          .eq('statut', 'actif');
+
+        const { data: ventesData, error: ventesError } = await supabase
+          .from('ventes')
+          .select('count');
+
+        // Calcul du chiffre d'affaires (somme des montants des abonnés et des ventes)
+        const { data: caData, error: caError } = await supabase
+          .rpc('get_chiffre_affaires');
+
+        // Vérifier les erreurs
+        if (locauxError || internatError || institutionsError || ventesError || caError) {
+          throw new Error("Erreur lors de la récupération des statistiques");
+        }
+
+        // Créer les données des statistiques
+        const stats = [
+          { 
+            title: "Abonnés locaux", 
+            value: locauxData[0]?.count || "0", 
+            icon: <UserIcon className="h-5 w-5" />,
+            change: { value: "0%", positive: true } 
+          },
+          { 
+            title: "Abonnés internationaux", 
+            value: internatData[0]?.count || "0", 
+            icon: <UserIcon className="h-5 w-5" />,
+            change: { value: "0%", positive: true } 
+          },
+          { 
+            title: "Institutions", 
+            value: institutionsData[0]?.count || "0", 
+            icon: <UsersIcon className="h-5 w-5" />,
+            change: { value: "0%", positive: true } 
+          },
+          { 
+            title: "Ventes au numéro", 
+            value: ventesData[0]?.count || "0", 
+            icon: <ShoppingCartIcon className="h-5 w-5" />,
+            change: { value: "0%", positive: true } 
+          },
+          {
+            title: "Chiffre d'affaires (DT)", 
+            value: caData?.[0]?.montant_total || "0", 
+            icon: <DollarSignIcon className="h-5 w-5" />, 
+            change: { value: "0%", positive: true }
+          }
+        ];
+
+        setStatsData(stats);
+
+        // Récupérer les données pour le graphique
+        const { data: chartRawData, error: chartError } = await supabase
+          .rpc('get_monthly_subscriptions');
+
+        if (chartError) throw new Error("Erreur lors de la récupération des données du graphique");
+
+        // Transformer les données brutes en format attendu par le composant
+        const months = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+        const formattedChartData = chartRawData?.map((item: any) => ({
+          month: months[parseInt(item.month) - 1],
+          locaux: item.locaux || 0,
+          internationaux: item.internationaux || 0,
+          institutions: item.institutions || 0
+        })) || [];
+
+        setChartData(formattedChartData);
+
+        // Récupérer les abonnés récents
+        const { data: recentSubsData, error: recentSubsError } = await supabase
+          .from('local_subscribers')
+          .select('id, nom, prenom, email, type_abonnement_id, statut, date_debut')
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (recentSubsError) throw new Error("Erreur lors de la récupération des abonnés récents");
+
+        // Transformer les données d'abonnés
+        const formattedSubscribers = recentSubsData?.map(sub => ({
+          id: sub.id,
+          name: `${sub.prenom} ${sub.nom}`,
+          email: sub.email,
+          type: sub.type_abonnement_id,  // Idéalement, récupérer le nom du type d'abonnement
+          status: sub.statut === 'actif' ? 'active' : 
+                  sub.statut === 'en_attente' ? 'pending' : 'expired',
+          date: new Date(sub.date_debut).toLocaleDateString('fr-FR')
+        })) || [];
+
+        setRecentSubscribers(formattedSubscribers);
+
+        // Récupérer les événements à venir
+        const { data: eventsData, error: eventsError } = await supabase
+          .from('calendar_events')
+          .select('*')
+          .gte('date', new Date().toISOString().split('T')[0])
+          .order('date', { ascending: true })
+          .limit(4);
+
+        if (eventsError) throw new Error("Erreur lors de la récupération des événements");
+
+        // Transformer les données d'événements
+        const formattedEvents = eventsData?.map(event => ({
+          id: event.id,
+          title: event.title,
+          date: new Date(event.date).toLocaleDateString('fr-FR'),
+          time: event.start_time,
+          type: event.description?.includes('réunion') ? 'meeting' :
+                event.description?.includes('échéance') ? 'deadline' : 'task',
+        })) || [];
+
+        setUpcomingEvents(formattedEvents);
+
+      } catch (error) {
+        console.error('Erreur lors du chargement des données du tableau de bord:', error);
+        toast({
+          title: "Erreur de chargement",
+          description: "Impossible de charger les données du tableau de bord",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
     }
-  ];
 
-  const chartData = [
-    { month: 'Jan', locaux: 45, internationaux: 20, institutions: 10 },
-    { month: 'Fév', locaux: 52, internationaux: 22, institutions: 12 },
-    { month: 'Mar', locaux: 61, internationaux: 25, institutions: 15 },
-    { month: 'Avr', locaux: 67, internationaux: 30, institutions: 16 },
-    { month: 'Mai', locaux: 70, internationaux: 32, institutions: 18 },
-    { month: 'Juin', locaux: 80, internationaux: 35, institutions: 21 },
-    { month: 'Juil', locaux: 90, internationaux: 38, institutions: 24 },
-    { month: 'Août', locaux: 95, internationaux: 40, institutions: 28 },
-  ];
+    fetchDashboardData();
+  }, []);
 
-  const recentSubscribers = [
-    { id: '1', name: 'Ahmed Ben Ali', email: 'ahmed@example.com', type: 'Annuel', status: 'active' as const, date: '15/04/2023' },
-    { id: '2', name: 'Fatma Zaied', email: 'fatma@example.com', type: 'Semestriel', status: 'active' as const, date: '10/04/2023' },
-    { id: '3', name: 'Mohamed Karoui', email: 'mohamed@example.com', type: 'Étudiant', status: 'pending' as const, date: '05/04/2023' },
-    { id: '4', name: 'Leila Trabelsi', email: 'leila@example.com', type: 'Annuel', status: 'active' as const, date: '01/04/2023' },
-    { id: '5', name: 'Sami Bouslama', email: 'sami@example.com', type: 'Trimestriel', status: 'expired' as const, date: '28/03/2023' },
-  ];
-
-  const upcomingEvents = [
-    { id: '1', title: 'Relance des abonnements expirés', date: '15 Mai 2023', time: '10:00', type: 'task' as const },
-    { id: '2', title: 'Réunion équipe commerciale', date: '17 Mai 2023', time: '14:30', type: 'meeting' as const },
-    { id: '3', title: 'Échéance paiement facture #12345', date: '20 Mai 2023', time: '23:59', type: 'deadline' as const },
-    { id: '4', title: 'Appel prospect Institut d\'Architecture', date: '22 Mai 2023', time: '11:00', type: 'meeting' as const },
-  ];
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-archibat-blue"></div>
+      </div>
+    );
+  }
 
   return (
     <div>

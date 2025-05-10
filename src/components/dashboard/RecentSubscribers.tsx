@@ -51,15 +51,23 @@ export function RecentSubscribers({ subscribers }: RecentSubscribersProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {subscribers.map((subscriber) => (
-              <TableRow key={subscriber.id}>
-                <TableCell className="font-medium">{subscriber.name}</TableCell>
-                <TableCell>{subscriber.email}</TableCell>
-                <TableCell>{subscriber.type}</TableCell>
-                <TableCell>{getStatusBadge(subscriber.status)}</TableCell>
-                <TableCell>{subscriber.date}</TableCell>
+            {subscribers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  Aucun abonné récent
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              subscribers.map((subscriber) => (
+                <TableRow key={subscriber.id}>
+                  <TableCell className="font-medium">{subscriber.name}</TableCell>
+                  <TableCell>{subscriber.email}</TableCell>
+                  <TableCell>{subscriber.type}</TableCell>
+                  <TableCell>{getStatusBadge(subscriber.status)}</TableCell>
+                  <TableCell>{subscriber.date}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

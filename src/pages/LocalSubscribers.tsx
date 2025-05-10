@@ -1,162 +1,73 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SubscribersTable, Subscriber } from '@/components/subscribers/SubscribersTable';
 import { AddSubscriberModal } from '@/components/subscribers/AddSubscriberModal';
+import { UserIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const LocalSubscribers = () => {
-  // Mock data for subscribers
-  const subscribers: Subscriber[] = [
-    {
-      id: '1',
-      nom: 'Ben Ali',
-      prenom: 'Ahmed',
-      email: 'ahmed@example.com',
-      telephone: '+216 55 123 456',
-      typeAbonnement: 'Annuel',
-      dateDebut: '15/04/2023',
-      dateFin: '15/04/2024',
-      montant: 120,
-      statut: 'actif',
-    },
-    {
-      id: '2',
-      nom: 'Zaied',
-      prenom: 'Fatma',
-      email: 'fatma@example.com',
-      telephone: '+216 55 234 567',
-      typeAbonnement: 'Semestriel',
-      dateDebut: '10/01/2023',
-      dateFin: '10/07/2023',
-      montant: 70,
-      statut: 'en_attente',
-    },
-    {
-      id: '3',
-      nom: 'Karoui',
-      prenom: 'Mohamed',
-      email: 'mohamed@example.com',
-      telephone: '+216 55 345 678',
-      typeAbonnement: 'Étudiant',
-      dateDebut: '05/03/2023',
-      dateFin: '05/03/2024',
-      montant: 60,
-      statut: 'actif',
-    },
-    {
-      id: '4',
-      nom: 'Trabelsi',
-      prenom: 'Leila',
-      email: 'leila@example.com',
-      telephone: '+216 55 456 789',
-      typeAbonnement: 'Annuel',
-      dateDebut: '01/01/2023',
-      dateFin: '01/01/2024',
-      montant: 120,
-      statut: 'actif',
-    },
-    {
-      id: '5',
-      nom: 'Bouslama',
-      prenom: 'Sami',
-      email: 'sami@example.com',
-      telephone: '+216 55 567 890',
-      typeAbonnement: 'Trimestriel',
-      dateDebut: '28/02/2023',
-      dateFin: '28/05/2023',
-      montant: 40,
-      statut: 'expire',
-    },
-    {
-      id: '6',
-      nom: 'Gharsallah',
-      prenom: 'Imen',
-      email: 'imen@example.com',
-      telephone: '+216 55 678 901',
-      typeAbonnement: 'Annuel',
-      dateDebut: '15/03/2023',
-      dateFin: '15/03/2024',
-      montant: 120,
-      statut: 'actif',
-    },
-    {
-      id: '7',
-      nom: 'Mejri',
-      prenom: 'Karim',
-      email: 'karim@example.com',
-      telephone: '+216 55 789 012',
-      typeAbonnement: 'Semestriel',
-      dateDebut: '20/04/2023',
-      dateFin: '20/10/2023',
-      montant: 70,
-      statut: 'actif',
-    },
-    {
-      id: '8',
-      nom: 'Riahi',
-      prenom: 'Nadia',
-      email: 'nadia@example.com',
-      telephone: '+216 55 890 123',
-      typeAbonnement: 'Annuel',
-      dateDebut: '10/05/2022',
-      dateFin: '10/05/2023',
-      montant: 120,
-      statut: 'expire',
-    },
-    {
-      id: '9',
-      nom: 'Jlassi',
-      prenom: 'Omar',
-      email: 'omar@example.com',
-      telephone: '+216 55 901 234',
-      typeAbonnement: 'Étudiant',
-      dateDebut: '25/04/2023',
-      dateFin: '25/04/2024',
-      montant: 60,
-      statut: 'en_attente',
-    },
-    {
-      id: '10',
-      nom: 'Makhlouf',
-      prenom: 'Sabrine',
-      email: 'sabrine@example.com',
-      telephone: '+216 55 012 345',
-      typeAbonnement: 'Annuel',
-      dateDebut: '05/05/2023',
-      dateFin: '05/05/2024',
-      montant: 120,
-      statut: 'actif',
-    },
-    {
-      id: '11',
-      nom: 'Mokrani',
-      prenom: 'Tarek',
-      email: 'tarek@example.com',
-      telephone: '+216 55 123 456',
-      typeAbonnement: 'Annuel',
-      dateDebut: '01/04/2023',
-      dateFin: '01/04/2024',
-      montant: 120,
-      statut: 'actif',
-    },
-    {
-      id: '12',
-      nom: 'Yacoubi',
-      prenom: 'Wafa',
-      email: 'wafa@example.com',
-      telephone: '+216 55 234 567',
-      typeAbonnement: 'Trimestriel',
-      dateDebut: '15/03/2023',
-      dateFin: '15/06/2023',
-      montant: 40,
-      statut: 'actif',
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchSubscribers() {
+      try {
+        setLoading(true);
+        
+        const { data, error } = await supabase
+          .from('local_subscribers')
+          .select('*, type_abonnement_id(nom)')
+          .order('nom');
+          
+        if (error) {
+          throw error;
+        }
+        
+        const formattedData: Subscriber[] = data.map(sub => ({
+          id: sub.id,
+          nom: sub.nom,
+          prenom: sub.prenom,
+          email: sub.email,
+          telephone: sub.telephone || '',
+          typeAbonnement: sub.type_abonnement_id?.nom || 'Standard',
+          dateDebut: new Date(sub.date_debut).toLocaleDateString('fr-FR'),
+          dateFin: new Date(sub.date_fin).toLocaleDateString('fr-FR'),
+          montant: sub.montant,
+          statut: sub.statut,
+        }));
+        
+        setSubscribers(formattedData);
+      } catch (error) {
+        console.error('Erreur lors du chargement des abonnés locaux:', error);
+        toast({
+          title: "Erreur de chargement",
+          description: "Impossible de charger les données des abonnés locaux",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
     }
-  ];
+    
+    fetchSubscribers();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-archibat-blue"></div>
+      </div>
+    );
+  }
 
   return (
     <div>
       <PageHeader 
         title="Abonnés locaux" 
         description="Gestion des abonnés en Tunisie"
+        icon={<UserIcon className="h-6 w-6 text-blue-500" />}
       >
         <AddSubscriberModal />
       </PageHeader>

@@ -1,75 +1,200 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { ProspectionTable } from '@/components/prospection/ProspectionTable';
 import { Button } from '@/components/ui/button';
-import { PlusIcon, PhoneCallIcon, UsersIcon, ImportIcon } from 'lucide-react';
+import { PlusIcon, PhoneCallIcon } from 'lucide-react';
 import { AddProspectionModal } from '@/components/prospection/AddProspectionModal';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ContactSelector } from '@/components/prospection/ContactSelector';
 import { AddSubscriberModal } from '@/components/subscribers/AddSubscriberModal';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+
+interface Contact {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+}
+
+interface ProspectionData {
+  id: number | string;
+  contactName: string;
+  date: string;
+  time: string;
+  type: string;
+  notes: string;
+  result: string;
+}
 
 const Prospection = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedContact, setSelectedContact] = useState(null);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [prospectionData, setProspectionData] = useState<ProspectionData[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [loading, setLoading] = useState({
+    prospection: true,
+    contacts: true
+  });
   
-  // Mock data - in a real app, this would come from Supabase
-  const [prospectionData, setProspectionData] = useState([
-    { 
-      id: 1, 
-      contactName: "Entreprise ABC", 
-      date: "2025-05-07", 
-      time: "14:30", 
-      type: "Appel téléphonique", 
-      notes: "Discussion sur les besoins en abonnement", 
-      result: "À relancer" 
-    },
-    { 
-      id: 2, 
-      contactName: "Cabinet XYZ", 
-      date: "2025-05-08", 
-      time: "10:00", 
-      type: "Rendez-vous physique", 
-      notes: "Présentation des offres", 
-      result: "Rendez-vous fixé" 
-    },
-    { 
-      id: 3, 
-      contactName: "Société 123", 
-      date: "2025-05-09", 
-      time: "16:15", 
-      type: "Visio", 
-      notes: "Démonstration de la plateforme", 
-      result: "Intéressé" 
+  useEffect(() => {
+    async function fetchProspectionData() {
+      try {
+        setLoading(prev => ({ ...prev, prospection: true }));
+        
+        const { data, error } = await supabase
+          .from('prospection')
+          .select('*')
+          .order('date', { ascending: false });
+          
+        if (error) throw error;
+        
+        const formattedData: ProspectionData[] = data.map(item => ({
+          id: item.id,
+          contactName: item.contact_name,
+          date: new Date(item.date).toISOString().split('T')[0],
+          time: item.time,
+          type: item.type,
+          notes: item.notes || '',
+          result: item.result || ''
+        }));
+        
+        setProspectionData(formattedData);
+      } catch (error) {
+        console.error('Erreur lors du chargement des données de prospection:', error);
+        toast({
+          title: "Erreur de chargement",
+          description: "Impossible de charger les données de prospection",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(prev => ({ ...prev, prospection: false }));
+      }
     }
-  ]);
+    
+    async function fetchContacts() {
+      try {
+        setLoading(prev => ({ ...prev, contacts: true }));
+        
+        const { data, error } = await supabase
+          .from('contacts')
+          .select('*')
+          .order('name');
+          
+        if (error) throw error;
+        
+        const formattedContacts: Contact[] = data.map(contact => ({
+          id: contact.id,
+          name: contact.name,
+          email: contact.email || '',
+          phone: contact.phone || ''
+        }));
+        
+        setContacts(formattedContacts);
+      } catch (error) {
+        console.error('Erreur lors du chargement des contacts:', error);
+        toast({
+          title: "Erreur de chargement",
+          description: "Impossible de charger les contacts",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(prev => ({ ...prev, contacts: false }));
+      }
+    }
+    
+    fetchProspectionData();
+    fetchContacts();
+  }, []);
 
-  // Mock data for contacts
-  const contacts = [
-    { id: 1, name: "Entreprise ABC", email: "contact@abc.com", phone: "+33 1 23 45 67 89" },
-    { id: 2, name: "Cabinet XYZ", email: "info@xyz.fr", phone: "+33 1 98 76 54 32" },
-    { id: 3, name: "Société 123", email: "contact@123.com", phone: "+33 6 12 34 56 78" },
-    { id: 4, name: "Agence DEF", email: "info@def.fr", phone: "+33 6 98 76 54 32" },
-    { id: 5, name: "Groupe GHI", email: "contact@ghi.com", phone: "+33 1 45 67 89 01" }
-  ];
-
-  const handleAddProspection = (newProspection) => {
-    setProspectionData([
-      ...prospectionData,
-      { id: prospectionData.length + 1, ...newProspection }
-    ]);
+  const handleAddProspection = async (newProspection: Omit<ProspectionData, 'id'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('prospection')
+        .insert([
+          {
+            contact_name: newProspection.contactName,
+            date: newProspection.date,
+            time: newProspection.time,
+            type: newProspection.type,
+            notes: newProspection.notes,
+            result: newProspection.result
+          }
+        ])
+        .select();
+        
+      if (error) throw error;
+      
+      if (data && data[0]) {
+        const formattedProspection: ProspectionData = {
+          id: data[0].id,
+          contactName: data[0].contact_name,
+          date: data[0].date,
+          time: data[0].time,
+          type: data[0].type,
+          notes: data[0].notes || '',
+          result: data[0].result || ''
+        };
+        
+        setProspectionData([formattedProspection, ...prospectionData]);
+        
+        toast({
+          title: "Prospection ajoutée",
+          description: "L'activité de prospection a été enregistrée avec succès",
+        });
+      }
+      
+      setIsAddModalOpen(false);
+    } catch (error) {
+      console.error('Erreur lors de l\'ajout de la prospection:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'ajouter l'activité de prospection",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleDeleteProspection = (id) => {
-    setProspectionData(prospectionData.filter(item => item.id !== id));
+  const handleDeleteProspection = async (id: number | string) => {
+    try {
+      const { error } = await supabase
+        .from('prospection')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      setProspectionData(prospectionData.filter(item => item.id !== id));
+      
+      toast({
+        title: "Suppression réussie",
+        description: "L'activité de prospection a été supprimée",
+      });
+    } catch (error) {
+      console.error('Erreur lors de la suppression:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de supprimer l'activité de prospection",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleSelectContact = (contact) => {
+  const handleSelectContact = (contact: Contact) => {
     setSelectedContact(contact);
     setIsAddModalOpen(true);
   };
+
+  if (loading.prospection || loading.contacts) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-archibat-blue"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto">
