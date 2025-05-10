@@ -36,6 +36,7 @@ interface TaskModalProps {
 export const TaskModal = ({
   open,
   onOpenChange,
+  onSave,
   task,
   weekDays,
   selectedDayIndex,
@@ -122,7 +123,7 @@ export const TaskModal = ({
       }
       
       onOpenChange(false);
-      // Plutôt que de recharger la page, on peut simplement appeler onSave
+      // Plutôt que de recharger la page, on utilise la prop onSave
       // pour déclencher le rechargement des tâches
       onSave({
         title,
