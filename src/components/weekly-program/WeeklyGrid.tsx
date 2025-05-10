@@ -48,13 +48,14 @@ export const WeeklyGrid = ({
   const tasksByDay: Record<number, WeeklyTask[]> = {};
   
   // Initialize empty arrays for each day
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 5; i++) { // Changé de 7 à 5 pour n'avoir que les jours ouvrables
     tasksByDay[i] = [];
   }
   
   // Fill in tasks for each day
   tasks.forEach(task => {
-    if (tasksByDay[task.dayIndex]) {
+    // Ne prendre que les tâches des jours ouvrables (index 0-4)
+    if (task.dayIndex >= 0 && task.dayIndex <= 4 && tasksByDay[task.dayIndex]) {
       tasksByDay[task.dayIndex].push(task);
     }
   });
@@ -65,6 +66,9 @@ export const WeeklyGrid = ({
       return a.startTime.localeCompare(b.startTime);
     });
   });
+
+  // Filtrer les jours de semaine uniquement (lundi à vendredi)
+  const workDays = weekDays.slice(0, 5);
 
   const handleDeleteClick = (taskId: string) => {
     setTaskToDelete(taskId);
@@ -80,8 +84,8 @@ export const WeeklyGrid = ({
   return (
     <div>
       {/* Day headers */}
-      <div className="grid grid-cols-7 gap-2 mb-4">
-        {weekDays.map((day, index) => (
+      <div className="grid grid-cols-5 gap-4 mb-4"> {/* Changé de grid-cols-7 à grid-cols-5 et gap-2 à gap-4 */}
+        {workDays.map((day, index) => (
           <div key={index} className="text-center font-medium">
             <div className="text-sm text-muted-foreground">{format(day, "EEEE", { locale: fr })}</div>
             <div className="text-lg">{format(day, "d MMM", { locale: fr })}</div>
@@ -90,16 +94,16 @@ export const WeeklyGrid = ({
       </div>
       
       {/* Grid for tasks */}
-      <div className="grid grid-cols-7 gap-2">
-        {weekDays.map((day, dayIndex) => (
-          <div key={dayIndex} className="min-h-[200px] border rounded-lg p-2 bg-gray-50">
+      <div className="grid grid-cols-5 gap-4"> {/* Changé de grid-cols-7 à grid-cols-5 et gap-2 à gap-4 */}
+        {workDays.map((day, dayIndex) => (
+          <div key={dayIndex} className="min-h-[220px] border rounded-lg p-3 bg-gray-50"> {/* Augmenté min-height et padding */}
             {/* Tasks for this day */}
-            <div className="space-y-2">
+            <div className="space-y-3"> {/* Augmenté l'espace entre les tâches */}
               {tasksByDay[dayIndex]?.map((task) => (
                 <Card key={task.id} className="bg-white">
-                  <CardContent className="p-3">
-                    <div className="font-medium">{task.title}</div>
-                    <div className="text-sm text-muted-foreground">
+                  <CardContent className="p-4"> {/* Augmenté le padding */}
+                    <div className="font-medium text-base">{task.title}</div> {/* Augmenté la taille du texte */}
+                    <div className="text-sm text-muted-foreground mt-1">
                       {task.startTime} - {task.endTime}
                     </div>
                     {task.location && (
@@ -108,17 +112,17 @@ export const WeeklyGrid = ({
                       </div>
                     )}
                   </CardContent>
-                  <CardFooter className="p-2 pt-0 flex justify-end gap-1">
+                  <CardFooter className="p-3 pt-0 flex justify-end gap-2"> {/* Augmenté le padding et l'espace entre les boutons */}
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-7 w-7"
+                            className="h-8 w-8" {/* Augmenté la taille des boutons */}
                             onClick={() => onEditTask(task)}
                           >
-                            <Edit className="h-3.5 w-3.5" />
+                            <Edit className="h-4 w-4" />
                             <span className="sr-only">Modifier</span>
                           </Button>
                         </TooltipTrigger>
@@ -134,10 +138,10 @@ export const WeeklyGrid = ({
                           <Button 
                             variant="ghost" 
                             size="icon" 
-                            className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50"
+                            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50" {/* Augmenté la taille des boutons */}
                             onClick={() => handleDeleteClick(task.id)}
                           >
-                            <Trash className="h-3.5 w-3.5" />
+                            <Trash className="h-4 w-4" />
                             <span className="sr-only">Supprimer</span>
                           </Button>
                         </TooltipTrigger>
@@ -155,10 +159,10 @@ export const WeeklyGrid = ({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full mt-2 text-muted-foreground hover:text-foreground"
+              className="w-full mt-3 text-muted-foreground hover:text-foreground"
               onClick={() => onAddTask(dayIndex)}
             >
-              <PlusIcon className="h-4 w-4 mr-1" />
+              <PlusIcon className="h-4 w-4 mr-2" />
               Ajouter
             </Button>
           </div>
