@@ -178,38 +178,30 @@ const UsersTab = () => {
           description: "L'utilisateur a été mis à jour",
         });
       } else {
-        // Création d'un nouvel utilisateur via l'API d'administration de Supabase
-        const { data, error } = await supabase.auth.admin.createUser({
-          email: formData.email,
-          password: formData.password,
-          email_confirm: true,
-          user_metadata: {
-            full_name: formData.name
-          }
+        // Création d'un nouvel utilisateur via la fonction Edge
+        const response = await fetch(`${supabase.supabaseUrl}/functions/v1/create-user`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabase.supabaseKey}`
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            name: formData.name,
+            role: formData.role
+          })
         });
 
-        if (error) throw error;
+        const result = await response.json();
 
-        if (data && data.user) {
-          // Le trigger DB s'occupe de créer le profil par défaut
-          // On met à jour uniquement le rôle si différent de "Viewer" (défaut)
-          if (formData.role !== 'Viewer') {
-            const { data: roleData } = await supabase
-              .from('roles')
-              .select('id')
-              .eq('name', formData.role)
-              .single();
+        if (!response.ok) {
+          throw new Error(result.error || "Erreur lors de la création de l'utilisateur");
+        }
 
-            if (roleData) {
-              await supabase
-                .from('profiles')
-                .update({ role_id: roleData.id })
-                .eq('id', data.user.id);
-            }
-          }
-
+        if (result.success && result.user) {
           const newUser = {
-            id: data.user.id,
+            id: result.user.id,
             name: formData.name,
             email: formData.email,
             role: formData.role
