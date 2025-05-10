@@ -179,11 +179,15 @@ const UsersTab = () => {
         });
       } else {
         // Création d'un nouvel utilisateur via la fonction Edge
-        const response = await fetch(`${supabase.supabaseUrl}/functions/v1/create-user`, {
+        // Instead of using supabaseUrl and supabaseKey directly, use the SUPABASE_URL from config
+        const SUPABASE_URL = "https://gopwhicebedqivdmrmks.supabase.co";
+        
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/create-user`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabase.supabaseKey}`
+            // Use the anon key from the client directly
+            'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdvcHdoaWNlYmVkcWl2ZG1ybWtzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY4MTA4MDQsImV4cCI6MjA2MjM4NjgwNH0.Pu9W7t4chigD3NOq0gj_AhGs5sohNjPusk4bacaP9-M"}`
           },
           body: JSON.stringify({
             email: formData.email,
@@ -358,3 +362,4 @@ const UsersTab = () => {
 };
 
 export default UsersTab;
+
