@@ -1,12 +1,11 @@
 
-import React, { useState } from 'react';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import React from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { PhoneIcon, UserIcon, MailIcon, ImportIcon } from 'lucide-react';
+import { PhoneCall } from 'lucide-react';
 
-interface Contact {
-  id: number;
+export interface Contact {
+  id: string | number;
   name: string;
   email: string;
   phone: string;
@@ -18,87 +17,46 @@ interface ContactSelectorProps {
 }
 
 export function ContactSelector({ contacts, onSelectContact }: ContactSelectorProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  
-  const filteredContacts = contacts.filter(contact => 
-    contact.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.phone.includes(searchTerm)
-  );
-  
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <div className="relative w-full mr-4">
-          <Input 
-            placeholder="Rechercher un contact..." 
-            value={searchTerm} 
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-          <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        </div>
-        <Button variant="outline" size="sm" className="flex items-center gap-2">
-          <ImportIcon className="h-4 w-4" />
-          <span>Importer</span>
-        </Button>
-      </div>
-      
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
+    <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nom</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Téléphone</TableHead>
+            <TableHead className="text-right">Action</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {contacts.length === 0 ? (
             <TableRow>
-              <TableHead>Contact</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Téléphone</TableHead>
-              <TableHead className="text-right">Action</TableHead>
+              <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                Aucun contact disponible
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredContacts.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                  Aucun contact trouvé
+          ) : (
+            contacts.map((contact) => (
+              <TableRow key={contact.id}>
+                <TableCell className="font-medium">{contact.name}</TableCell>
+                <TableCell>{contact.email}</TableCell>
+                <TableCell>{contact.phone}</TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => onSelectContact(contact)}
+                    className="flex items-center gap-2 text-archibat-blue hover:text-archibat-blue hover:bg-blue-50"
+                  >
+                    <PhoneCall size={16} />
+                    Appeler
+                  </Button>
                 </TableCell>
               </TableRow>
-            ) : (
-              filteredContacts.map((contact) => (
-                <TableRow key={contact.id}>
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                        <UserIcon className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                      {contact.name}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <MailIcon className="h-4 w-4 text-muted-foreground" />
-                      {contact.email}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <PhoneIcon className="h-4 w-4 text-muted-foreground" />
-                      {contact.phone}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button 
-                      onClick={() => onSelectContact(contact)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      Contacter
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+            ))
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }

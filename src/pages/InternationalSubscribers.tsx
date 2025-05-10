@@ -32,11 +32,13 @@ const InternationalSubscribers = () => {
           email: sub.email,
           telephone: sub.telephone || '',
           pays: sub.pays,
-          typeAbonnement: sub.type_abonnement_id?.nom || 'Standard',
+          typeAbonnement: typeof sub.type_abonnement_id === 'object' && sub.type_abonnement_id !== null 
+            ? (sub.type_abonnement_id as any).nom || 'Standard'
+            : 'Standard',
           dateDebut: new Date(sub.date_debut).toLocaleDateString('fr-FR'),
           dateFin: new Date(sub.date_fin).toLocaleDateString('fr-FR'),
           montant: sub.montant,
-          statut: sub.statut,
+          statut: mapStatut(sub.statut),
         }));
         
         setSubscribers(formattedData);
@@ -54,6 +56,21 @@ const InternationalSubscribers = () => {
     
     fetchSubscribers();
   }, []);
+
+  // Fonction pour mapper le statut aux valeurs attendues
+  const mapStatut = (statut: string): 'actif' | 'en_attente' | 'expire' => {
+    switch (statut) {
+      case 'actif':
+        return 'actif';
+      case 'en_attente':
+        return 'en_attente';
+      case 'expire':
+      case 'expiré':
+        return 'expire';
+      default:
+        return 'en_attente';
+    }
+  };
 
   if (loading) {
     return (

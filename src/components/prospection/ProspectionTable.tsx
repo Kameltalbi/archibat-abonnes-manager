@@ -1,57 +1,43 @@
 
 import React from 'react';
-import { 
-  Table, 
-  TableHeader, 
-  TableBody, 
-  TableRow, 
-  TableHead, 
-  TableCell 
-} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Trash2, ExternalLink } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { PencilIcon, TrashIcon } from 'lucide-react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
-interface ProspectionItem {
-  id: number;
+export interface ProspectionItem {
+  id: string | number;
   contactName: string;
   date: string;
-  time?: string;
+  time: string;
   type: string;
-  notes: string;
-  result: string;
+  notes?: string;
+  result?: string;
 }
 
 interface ProspectionTableProps {
   data: ProspectionItem[];
-  onDelete: (id: number) => void;
+  onDelete: (id: string | number) => void;
 }
 
 export function ProspectionTable({ data, onDelete }: ProspectionTableProps) {
-  const getBadgeVariant = (result: string) => {
-    switch(result) {
-      case 'Rendez-vous fixé':
-        return 'default';
-      case 'À relancer':
-        return 'secondary';
-      case 'Intéressé':
-        return 'outline';
-      case 'Pas intéressé':
-        return 'destructive';
+  const getTypeColor = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'appel':
+        return 'bg-blue-100 text-blue-700 border-blue-300';
+      case 'réunion':
+        return 'bg-green-100 text-green-700 border-green-300';
+      case 'email':
+        return 'bg-purple-100 text-purple-700 border-purple-300';
       default:
-        return 'outline';
+        return 'bg-gray-100 text-gray-700 border-gray-300';
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return format(date, 'dd MMMM yyyy', { locale: fr });
-    } catch (e) {
-      return dateString;
-    }
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('fr-FR');
   };
 
   return (
@@ -59,10 +45,10 @@ export function ProspectionTable({ data, onDelete }: ProspectionTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Contact</TableHead>
             <TableHead>Date</TableHead>
-            <TableHead>Contact / Entreprise</TableHead>
+            <TableHead>Heure</TableHead>
             <TableHead>Type</TableHead>
-            <TableHead>Résumé</TableHead>
             <TableHead>Résultat</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -71,40 +57,32 @@ export function ProspectionTable({ data, onDelete }: ProspectionTableProps) {
           {data.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                Aucune action de prospection enregistrée
+                Aucune activité de prospection
               </TableCell>
             </TableRow>
           ) : (
-            data.map((item) => (
-              <TableRow key={item.id}>
+            data.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell className="font-medium">{row.contactName}</TableCell>
+                <TableCell>{formatDate(row.date)}</TableCell>
+                <TableCell>{row.time}</TableCell>
                 <TableCell>
-                  <div className="font-medium">{formatDate(item.date)}</div>
-                  {item.time && <div className="text-sm text-muted-foreground">{item.time}</div>}
+                  <Badge variant="outline" className={getTypeColor(row.type)}>{row.type}</Badge>
                 </TableCell>
-                <TableCell className="font-medium">{item.contactName}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="bg-muted/50">
-                    {item.type}
-                  </Badge>
-                </TableCell>
-                <TableCell className="max-w-xs truncate">{item.notes}</TableCell>
-                <TableCell>
-                  <Badge variant={getBadgeVariant(item.result)}>
-                    {item.result}
-                  </Badge>
+                  {row.result ? (
+                    <span className="text-sm">{row.result}</span>
+                  ) : (
+                    <span className="text-sm text-muted-foreground italic">Non précisé</span>
+                  )}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon">
-                      <PencilIcon className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" onClick={() => onDelete(row.id)} className="text-red-500 hover:text-red-700">
+                      <Trash2 size={16} />
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      onClick={() => onDelete(item.id)}
-                    >
-                      <TrashIcon className="h-4 w-4" />
+                    <Button variant="ghost" size="icon">
+                      <ExternalLink size={16} />
                     </Button>
                   </div>
                 </TableCell>

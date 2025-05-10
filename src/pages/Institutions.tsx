@@ -27,13 +27,13 @@ const Institutions = () => {
         const formattedData: Institution[] = data.map(inst => ({
           id: inst.id,
           nom: inst.nom,
-          type: inst.type,
+          type: mapInstitutionType(inst.type),
           adresse: inst.adresse || '',
           telephone: inst.telephone || '',
           email: inst.email || '',
           contact: inst.contact || '',
           dateAdhesion: inst.date_adhesion ? new Date(inst.date_adhesion).toLocaleDateString('fr-FR') : '',
-          statut: inst.statut,
+          statut: inst.statut as 'actif' | 'inactif' | 'en_attente',
         }));
 
         setInstitutions(formattedData);
@@ -51,6 +51,22 @@ const Institutions = () => {
 
     fetchInstitutions();
   }, []);
+
+  // Fonction pour mapper les types d'institutions aux valeurs attendues
+  const mapInstitutionType = (type: string): 'Université' | 'École' | 'Institut' | 'Centre de recherche' | 'Autre' => {
+    switch (type) {
+      case 'Université':
+        return 'Université';
+      case 'École':
+        return 'École';
+      case 'Institut':
+        return 'Institut';
+      case 'Centre de recherche':
+        return 'Centre de recherche';
+      default:
+        return 'Autre';
+    }
+  };
 
   if (loading) {
     return (

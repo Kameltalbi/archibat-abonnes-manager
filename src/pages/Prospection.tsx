@@ -1,39 +1,22 @@
 
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
-import { ProspectionTable } from '@/components/prospection/ProspectionTable';
+import { ProspectionTable, ProspectionItem } from '@/components/prospection/ProspectionTable';
 import { Button } from '@/components/ui/button';
 import { PlusIcon, PhoneCallIcon } from 'lucide-react';
 import { AddProspectionModal } from '@/components/prospection/AddProspectionModal';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ContactSelector } from '@/components/prospection/ContactSelector';
+import { ContactSelector, Contact } from '@/components/prospection/ContactSelector';
 import { AddSubscriberModal } from '@/components/subscribers/AddSubscriberModal';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-interface Contact {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-}
-
-interface ProspectionData {
-  id: number | string;
-  contactName: string;
-  date: string;
-  time: string;
-  type: string;
-  notes: string;
-  result: string;
-}
-
 const Prospection = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-  const [prospectionData, setProspectionData] = useState<ProspectionData[]>([]);
+  const [prospectionData, setProspectionData] = useState<ProspectionItem[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState({
     prospection: true,
@@ -52,10 +35,10 @@ const Prospection = () => {
           
         if (error) throw error;
         
-        const formattedData: ProspectionData[] = data.map(item => ({
+        const formattedData: ProspectionItem[] = data.map(item => ({
           id: item.id,
           contactName: item.contact_name,
-          date: new Date(item.date).toISOString().split('T')[0],
+          date: item.date,
           time: item.time,
           type: item.type,
           notes: item.notes || '',
@@ -110,7 +93,7 @@ const Prospection = () => {
     fetchContacts();
   }, []);
 
-  const handleAddProspection = async (newProspection: Omit<ProspectionData, 'id'>) => {
+  const handleAddProspection = async (newProspection: Omit<ProspectionItem, 'id'>) => {
     try {
       const { data, error } = await supabase
         .from('prospection')
@@ -129,7 +112,7 @@ const Prospection = () => {
       if (error) throw error;
       
       if (data && data[0]) {
-        const formattedProspection: ProspectionData = {
+        const formattedProspection: ProspectionItem = {
           id: data[0].id,
           contactName: data[0].contact_name,
           date: data[0].date,
@@ -158,7 +141,7 @@ const Prospection = () => {
     }
   };
 
-  const handleDeleteProspection = async (id: number | string) => {
+  const handleDeleteProspection = async (id: string | number) => {
     try {
       const { error } = await supabase
         .from('prospection')

@@ -46,7 +46,7 @@ const Ventes = () => {
           client: v.client,
           montant: v.montant,
           modePaiement: v.mode_paiement,
-          statut: v.statut as 'payé' | 'en_attente' | 'annulé',
+          statut: mapStatut(v.statut),
         }));
         
         setVentes(formattedData);
@@ -64,6 +64,20 @@ const Ventes = () => {
     
     fetchVentes();
   }, []);
+
+  // Fonction pour mapper le statut aux valeurs attendues
+  const mapStatut = (statut: string): 'payé' | 'en_attente' | 'annulé' => {
+    switch (statut) {
+      case 'payé':
+        return 'payé';
+      case 'en_attente':
+        return 'en_attente';
+      case 'annulé':
+        return 'annulé';
+      default:
+        return 'en_attente';
+    }
+  };
   
   const handleAddVente = async (newVente: Omit<Vente, 'id'>) => {
     try {
@@ -98,7 +112,7 @@ const Ventes = () => {
           client: data[0].client,
           montant: data[0].montant,
           modePaiement: data[0].mode_paiement,
-          statut: data[0].statut,
+          statut: mapStatut(data[0].statut),
         };
         
         setVentes([formattedVente, ...ventes]);
