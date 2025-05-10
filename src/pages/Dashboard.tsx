@@ -77,11 +77,17 @@ const Dashboard = () => {
         // Utiliser une requête standard au lieu de RPC
         const { data: caData, error: caError } = await supabase
           .from('ventes')
-          .select('sum(montant) as montant_total');
+          .select('montant');
 
         // Vérifier les erreurs
         if (locauxError || internatError || institutionsError || ventesError || caError) {
           throw new Error("Erreur lors de la récupération des statistiques");
+        }
+
+        // Calculer le montant total manuellement
+        let montantTotal = 0;
+        if (caData && caData.length > 0) {
+          montantTotal = caData.reduce((sum, item) => sum + Number(item.montant || 0), 0);
         }
 
         // Créer les données des statistiques
@@ -112,7 +118,7 @@ const Dashboard = () => {
           },
           {
             title: "Chiffre d'affaires (DT)", 
-            value: caData?.[0]?.montant_total || "0", 
+            value: montantTotal.toString() || "0", 
             icon: <DollarSignIcon className="h-5 w-5" />, 
             change: { value: "0%", positive: true }
           }

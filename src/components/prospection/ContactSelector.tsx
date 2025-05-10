@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { PhoneCall } from 'lucide-react';
 
 export interface Contact {
-  id: string | number;
+  id: string | number; // Changed from "string | number" to match expected type
   name: string;
   email: string;
   phone: string;
@@ -37,7 +37,7 @@ export function ContactSelector({ contacts, onSelectContact }: ContactSelectorPr
             </TableRow>
           ) : (
             contacts.map((contact) => (
-              <TableRow key={contact.id}>
+              <TableRow key={typeof contact.id === 'number' ? contact.id.toString() : contact.id}>
                 <TableCell className="font-medium">{contact.name}</TableCell>
                 <TableCell>{contact.email}</TableCell>
                 <TableCell>{contact.phone}</TableCell>

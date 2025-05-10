@@ -13,10 +13,15 @@ import { AddSubscriberModal } from '@/components/subscribers/AddSubscriberModal'
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
+// Define a local type that matches both our component needs and Supabase data
+interface ProspectionData extends Omit<ProspectionItem, 'id'> {
+  id: string;
+}
+
 const Prospection = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-  const [prospectionData, setProspectionData] = useState<ProspectionItem[]>([]);
+  const [prospectionData, setProspectionData] = useState<ProspectionData[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState({
     prospection: true,
@@ -35,7 +40,7 @@ const Prospection = () => {
           
         if (error) throw error;
         
-        const formattedData: ProspectionItem[] = data.map(item => ({
+        const formattedData: ProspectionData[] = data.map(item => ({
           id: item.id,
           contactName: item.contact_name,
           date: item.date,
@@ -112,7 +117,7 @@ const Prospection = () => {
       if (error) throw error;
       
       if (data && data[0]) {
-        const formattedProspection: ProspectionItem = {
+        const formattedProspection: ProspectionData = {
           id: data[0].id,
           contactName: data[0].contact_name,
           date: data[0].date,
@@ -141,7 +146,7 @@ const Prospection = () => {
     }
   };
 
-  const handleDeleteProspection = async (id: string | number) => {
+  const handleDeleteProspection = async (id: string) => {
     try {
       const { error } = await supabase
         .from('prospection')
@@ -178,6 +183,12 @@ const Prospection = () => {
       </div>
     );
   }
+
+  // Convert ProspectionData to ProspectionItem for the table component
+  const tableData: ProspectionItem[] = prospectionData.map(item => ({
+    ...item,
+    id: Number(item.id) || 0 // Convert string id to number or use 0 as fallback
+  }));
 
   return (
     <div className="container mx-auto">
@@ -228,7 +239,7 @@ const Prospection = () => {
               </div>
               
               <ProspectionTable 
-                data={prospectionData}
+                data={tableData}
                 onDelete={handleDeleteProspection}
               />
             </Card>
