@@ -52,8 +52,9 @@ export function LoginForm() {
           description: "Vous êtes maintenant connecté",
         });
         
-        // Redirection vers le tableau de bord
-        navigate("/dashboard");
+        // Redirection vers le tableau de bord avec forceRefresh pour s'assurer que la page est rechargée
+        // et que l'état d'authentification est correctement mis à jour
+        window.location.href = "/dashboard";
       }
     } catch (error: any) {
       console.error("Erreur de connexion:", error);
