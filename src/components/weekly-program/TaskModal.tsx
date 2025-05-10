@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { format, addDays, startOfWeek } from 'date-fns';
+import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -79,12 +79,16 @@ export const TaskModal = ({
     setIsLoading(true);
 
     try {
+      // Utiliser la date correspondant au jour de la semaine sélectionné
       const selectedDate = weekDays[dayIndex];
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+      
+      console.log('Saving task for date:', formattedDate, 'day index:', dayIndex);
       
       const taskData = {
         title,
         day_index: dayIndex,
-        date: format(selectedDate, 'yyyy-MM-dd'),
+        date: formattedDate,
         start_time: startTime,
         end_time: endTime,
         location: location || null
@@ -118,7 +122,16 @@ export const TaskModal = ({
       }
       
       onOpenChange(false);
-      window.location.reload(); // Refresh to show updated data
+      // Plutôt que de recharger la page, on peut simplement appeler onSave
+      // pour déclencher le rechargement des tâches
+      onSave({
+        title,
+        dayIndex,
+        date: selectedDate,
+        startTime,
+        endTime,
+        location
+      });
     } catch (error: any) {
       console.error('Error saving task:', error);
       toast({

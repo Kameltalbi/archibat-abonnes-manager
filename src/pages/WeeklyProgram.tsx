@@ -48,6 +48,8 @@ const WeeklyProgram = () => {
       const weekStart = format(startOfWeek(selectedWeek, { weekStartsOn: 1 }), 'yyyy-MM-dd');
       const weekEnd = format(addDays(startOfWeek(selectedWeek, { weekStartsOn: 1 }), 6), 'yyyy-MM-dd');
       
+      console.log('Fetching tasks from', weekStart, 'to', weekEnd);
+      
       const { data, error } = await supabase
         .from('weekly_tasks')
         .select('*')
@@ -55,6 +57,8 @@ const WeeklyProgram = () => {
         .lte('date', weekEnd);
         
       if (error) throw error;
+      
+      console.log('Fetched tasks:', data);
       
       if (data) {
         const mappedTasks: WeeklyTask[] = data.map(task => ({
@@ -68,6 +72,8 @@ const WeeklyProgram = () => {
         }));
         
         setTasks(mappedTasks);
+      } else {
+        setTasks([]);
       }
     } catch (error: any) {
       console.error('Error fetching tasks:', error);
@@ -76,6 +82,7 @@ const WeeklyProgram = () => {
         description: "Impossible de récupérer les tâches",
         variant: "destructive",
       });
+      setTasks([]);
     } finally {
       setIsLoading(false);
     }
