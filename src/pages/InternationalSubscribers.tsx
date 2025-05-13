@@ -2,8 +2,16 @@
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { InternationalSubscribersTable, InternationalSubscriber } from '@/components/subscribers/InternationalSubscribersTable';
-import { Globe } from 'lucide-react';
-import { AddSubscriberModal } from '@/components/subscribers/AddSubscriberModal';
+import { Globe, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { 
+  Dialog,
+  DialogContent, 
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from '@/components/ui/dialog';
+import { SubscriberForm } from '@/components/subscribers/SubscriberForm';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -11,6 +19,7 @@ const InternationalSubscribers = () => {
   const [subscribers, setSubscribers] = useState<InternationalSubscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchSubscribers() {
@@ -121,7 +130,20 @@ const InternationalSubscribers = () => {
         description="Gestion des abonnés internationaux"
         icon={<Globe className="h-6 w-6 text-purple-500" />}
       >
-        <AddSubscriberModal />
+        <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-purple-500 hover:bg-purple-600">
+              <Plus className="mr-2 h-4 w-4" />
+              Ajouter
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Nouvel abonné international</DialogTitle>
+            </DialogHeader>
+            <SubscriberForm onClose={() => setModalOpen(false)} isInternational={true} />
+          </DialogContent>
+        </Dialog>
       </PageHeader>
       
       <InternationalSubscribersTable subscribers={subscribers} />

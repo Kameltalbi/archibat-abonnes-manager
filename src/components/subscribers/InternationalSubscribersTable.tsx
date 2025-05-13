@@ -122,19 +122,14 @@ export function InternationalSubscribersTable({ subscribers: initialSubscribers 
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="relative w-80">
-          <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Rechercher un abonné international..."
-            className="pl-8"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <Button onClick={() => navigate('/abonnes-internationaux/nouveau')} className="bg-purple-500 hover:bg-purple-600">
-          Ajouter un abonné international
-        </Button>
+      <div className="relative w-80">
+        <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Rechercher un abonné international..."
+          className="pl-8"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       <div className="rounded-md border">
