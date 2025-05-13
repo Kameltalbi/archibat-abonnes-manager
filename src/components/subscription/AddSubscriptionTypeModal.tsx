@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Dialog, 
@@ -9,7 +8,6 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { 
   Select,
   SelectContent,
@@ -86,15 +84,17 @@ export function AddSubscriptionTypeModal({ isOpen, onClose, onSubmit }: AddSubsc
       console.log('Types d\'abonnement récupérés:', data);
       
       // Map the data from Supabase to match our SubscriptionType interface
-      // Ensure typeLecteur is properly typed as one of the allowed values
+      // and ensure that typeLecteur is one of the allowed values
       const mappedTypes: SubscriptionType[] = data.map(item => {
-        // Validate type_lecteur is one of the allowed values
+        // Parse the type_lecteur to make sure it's one of the allowed values
         let typeLecteur: 'particulier' | 'etudiant' | 'institution' = 'particulier';
         
-        if (item.type_lecteur === 'particulier' || 
-            item.type_lecteur === 'etudiant' || 
+        if (item.type_lecteur === 'etudiant' || 
+            item.type_lecteur === 'particulier' || 
             item.type_lecteur === 'institution') {
           typeLecteur = item.type_lecteur as 'particulier' | 'etudiant' | 'institution';
+        } else {
+          console.warn(`Type de lecteur invalid trouvé: ${item.type_lecteur}, utilisant 'particulier' par défaut`);
         }
         
         return {
