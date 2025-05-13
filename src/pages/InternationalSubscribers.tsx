@@ -16,14 +16,29 @@ const InternationalSubscribers = () => {
       try {
         setLoading(true);
         
+        // Modifié pour ne plus utiliser la jointure qui échoue
         const { data, error } = await supabase
           .from('international_subscribers')
-          .select('*, type_abonnement_id(nom)')
+          .select('*')
           .order('nom');
           
         if (error) {
           throw error;
         }
+        
+        // Récupérer les types d'abonnement séparément si nécessaire
+        const { data: typesAbonnement, error: typesError } = await supabase
+          .from('subscription_types')
+          .select('id, nom');
+          
+        if (typesError) {
+          console.error("Erreur lors du chargement des types d'abonnement:", typesError);
+        }
+        
+        // Créer un mapping des types d'abonnement pour faciliter la recherche
+        const typeMap = typesAbonnement ? 
+          Object.fromEntries(typesAbonnement.map(type => [type.id, type.nom])) : 
+          {};
         
         const formattedData: InternationalSubscriber[] = data.map(sub => ({
           id: sub.id,
@@ -32,9 +47,8 @@ const InternationalSubscribers = () => {
           email: sub.email,
           telephone: sub.telephone || '',
           pays: sub.pays,
-          typeAbonnement: typeof sub.type_abonnement_id === 'object' && sub.type_abonnement_id !== null 
-            ? (sub.type_abonnement_id as any).nom || 'Standard'
-            : 'Standard',
+          // Utiliser le mapping ou une valeur par défaut
+          typeAbonnement: sub.type_abonnement_id ? typeMap[sub.type_abonnement_id] || 'Standard' : 'Standard',
           dateDebut: new Date(sub.date_debut).toLocaleDateString('fr-FR'),
           dateFin: new Date(sub.date_fin).toLocaleDateString('fr-FR'),
           montant: sub.montant,
@@ -42,6 +56,7 @@ const InternationalSubscribers = () => {
         }));
         
         setSubscribers(formattedData);
+        console.log("Données d'abonnés internationaux chargées avec succès:", formattedData);
       } catch (error) {
         console.error('Erreur lors du chargement des abonnés internationaux:', error);
         toast({
