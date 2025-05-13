@@ -10,11 +10,36 @@ import { toast } from '@/hooks/use-toast';
 const LocalSubscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authStatus, setAuthStatus] = useState<'authenticated' | 'unauthenticated' | 'checking'>('checking');
+
+  // Check authentication status
+  useEffect(() => {
+    async function checkAuth() {
+      const { data } = await supabase.auth.getSession();
+      setAuthStatus(data.session ? 'authenticated' : 'unauthenticated');
+    }
+    
+    checkAuth();
+    
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setAuthStatus(session ? 'authenticated' : 'unauthenticated');
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     async function fetchSubscribers() {
       try {
         setLoading(true);
+        
+        if (authStatus !== 'authenticated') {
+          console.log('Utilisateur non authentifié, impossible de charger les abonnés');
+          return;
+        }
         
         // Updated query to use the proper relationship syntax
         const { data, error } = await supabase
@@ -25,6 +50,8 @@ const LocalSubscribers = () => {
         if (error) {
           throw error;
         }
+        
+        console.log('Données brutes des abonnés:', data);
         
         const formattedData: Subscriber[] = data.map(sub => ({
           id: sub.id,
@@ -52,8 +79,12 @@ const LocalSubscribers = () => {
       }
     }
     
-    fetchSubscribers();
-  }, []);
+    if (authStatus === 'authenticated') {
+      fetchSubscribers();
+    } else if (authStatus === 'unauthenticated') {
+      setLoading(false);
+    }
+  }, [authStatus]);
 
   // Fonction pour mapper le statut aux valeurs attendues
   const mapStatut = (statut: string): 'actif' | 'en_attente' | 'expire' => {
@@ -69,6 +100,24 @@ const LocalSubscribers = () => {
         return 'en_attente';
     }
   };
+
+  if (authStatus === 'checking') {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-archibat-blue"></div>
+      </div>
+    );
+  }
+
+  if (authStatus === 'unauthenticated') {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 space-y-4">
+        <UserIcon className="h-12 w-12 text-gray-400" />
+        <h2 className="text-xl font-semibold">Authentification requise</h2>
+        <p className="text-gray-500">Veuillez vous connecter pour accéder à la gestion des abonnés</p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

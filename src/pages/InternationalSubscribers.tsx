@@ -20,6 +20,26 @@ const InternationalSubscribers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [authStatus, setAuthStatus] = useState<'authenticated' | 'unauthenticated' | 'checking'>('checking');
+
+  // Check authentication status
+  useEffect(() => {
+    async function checkAuth() {
+      const { data } = await supabase.auth.getSession();
+      setAuthStatus(data.session ? 'authenticated' : 'unauthenticated');
+    }
+    
+    checkAuth();
+    
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setAuthStatus(session ? 'authenticated' : 'unauthenticated');
+    });
+    
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     async function fetchSubscribers() {
@@ -27,29 +47,22 @@ const InternationalSubscribers = () => {
         setLoading(true);
         setError(null);
         
+        if (authStatus !== 'authenticated') {
+          console.log('Utilisateur non authentifié, impossible de charger les abonnés');
+          return;
+        }
+        
         // Query for international subscribers
         const { data, error } = await supabase
           .from('international_subscribers')
-          .select('*')
+          .select('*, subscription_types(nom)')
           .order('nom');
           
         if (error) {
           throw error;
         }
         
-        // Retrieve subscription types separately
-        const { data: typesAbonnement, error: typesError } = await supabase
-          .from('subscription_types')
-          .select('id, nom');
-          
-        if (typesError) {
-          console.error("Erreur lors du chargement des types d'abonnement:", typesError);
-        }
-        
-        // Create a mapping of subscription types for easier lookup
-        const typeMap = typesAbonnement ? 
-          Object.fromEntries(typesAbonnement.map(type => [type.id, type.nom])) : 
-          {};
+        console.log('Données brutes des abonnés internationaux:', data);
         
         const formattedData: InternationalSubscriber[] = data.map(sub => ({
           id: sub.id,
@@ -58,8 +71,7 @@ const InternationalSubscribers = () => {
           email: sub.email,
           telephone: sub.telephone || '',
           pays: sub.pays,
-          // Use the mapping or a default value
-          typeAbonnement: sub.type_abonnement_id ? typeMap[sub.type_abonnement_id] || 'Standard' : 'Standard',
+          typeAbonnement: sub.subscription_types ? sub.subscription_types.nom : 'Standard',
           dateDebut: new Date(sub.date_debut).toLocaleDateString('fr-FR'),
           dateFin: new Date(sub.date_fin).toLocaleDateString('fr-FR'),
           montant: sub.montant,
@@ -81,8 +93,12 @@ const InternationalSubscribers = () => {
       }
     }
     
-    fetchSubscribers();
-  }, []);
+    if (authStatus === 'authenticated') {
+      fetchSubscribers();
+    } else if (authStatus === 'unauthenticated') {
+      setLoading(false);
+    }
+  }, [authStatus]);
 
   // Map the status to expected values
   const mapStatut = (statut: string): 'actif' | 'en_attente' | 'expire' => {
@@ -98,6 +114,24 @@ const InternationalSubscribers = () => {
         return 'en_attente';
     }
   };
+
+  if (authStatus === 'checking') {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
+  if (authStatus === 'unauthenticated') {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 space-y-4">
+        <Globe className="h-12 w-12 text-gray-400" />
+        <h2 className="text-xl font-semibold">Authentification requise</h2>
+        <p className="text-gray-500">Veuillez vous connecter pour accéder à la gestion des abonnés internationaux</p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
