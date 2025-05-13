@@ -36,7 +36,7 @@ export function AddInstitutionModal({ onInstitutionAdded }: AddInstitutionModalP
       </DialogTrigger>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nouvelle institution</DialogTitle>
+          <DialogTitle>Nouvelle institution abonnée</DialogTitle>
         </DialogHeader>
         <InstitutionForm onClose={handleClose} />
       </DialogContent>
