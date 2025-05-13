@@ -52,10 +52,18 @@ const InternationalSubscribers = () => {
           return;
         }
         
-        // Query for international subscribers
+        // Make sure we're correctly selecting the subscription type data
         const { data, error } = await supabase
           .from('international_subscribers')
-          .select('*, subscription_types(nom)')
+          .select(`
+            *,
+            subscription_types (
+              id,
+              nom,
+              prix,
+              duree
+            )
+          `)
           .order('nom');
           
         if (error) {
@@ -74,7 +82,7 @@ const InternationalSubscribers = () => {
           typeAbonnement: sub.subscription_types ? sub.subscription_types.nom : 'Standard',
           dateDebut: new Date(sub.date_debut).toLocaleDateString('fr-FR'),
           dateFin: new Date(sub.date_fin).toLocaleDateString('fr-FR'),
-          montant: sub.montant,
+          montant: sub.montant || (sub.subscription_types ? sub.subscription_types.prix : 0),
           statut: mapStatut(sub.statut),
         }));
         
