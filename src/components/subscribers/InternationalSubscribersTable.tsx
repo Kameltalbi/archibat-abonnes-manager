@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -30,6 +29,7 @@ import {
   ArrowUp,
   Globe,
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 export interface InternationalSubscriber {
   id: string;
@@ -166,7 +166,7 @@ export function InternationalSubscribersTable({ subscribers: initialSubscribers 
                   sortOrder === 'asc' ? <ArrowUp className="inline w-4 h-4 ml-1" /> : <ArrowDown className="inline w-4 h-4 ml-1" />
                 )}
               </TableHead>
-              <TableHead>Montant (€)</TableHead>
+              <TableHead>Montant</TableHead>
               <TableHead>Statut</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
@@ -187,7 +187,7 @@ export function InternationalSubscribersTable({ subscribers: initialSubscribers 
                   <TableCell>{subscriber.pays}</TableCell>
                   <TableCell>{subscriber.typeAbonnement}</TableCell>
                   <TableCell>{subscriber.dateFin}</TableCell>
-                  <TableCell>{subscriber.montant} €</TableCell>
+                  <TableCell>{formatCurrency(subscriber.montant)}</TableCell>
                   <TableCell>{getStatusBadge(subscriber.statut)}</TableCell>
                   <TableCell>
                     <DropdownMenu>

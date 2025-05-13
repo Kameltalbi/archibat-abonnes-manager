@@ -9,7 +9,7 @@ export function cn(...inputs: ClassValue[]) {
 export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
-    currency: 'EUR',
+    currency: 'TND', // Changed from EUR to TND (Tunisian Dinar)
     minimumFractionDigits: 2
   }).format(amount);
 }

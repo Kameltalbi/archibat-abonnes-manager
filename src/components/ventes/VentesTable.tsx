@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Table,
@@ -10,18 +9,11 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { type Vente } from '@/pages/Ventes';
+import { formatCurrency } from '@/lib/utils';
 
 interface VentesTableProps {
   ventes: Vente[];
 }
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency: 'XAF',
-    minimumFractionDigits: 0,
-  }).format(amount);
-};
 
 export function VentesTable({ ventes }: VentesTableProps) {
   const getStatusBadge = (statut: Vente['statut']) => {
