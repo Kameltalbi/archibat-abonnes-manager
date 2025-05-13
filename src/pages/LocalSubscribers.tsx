@@ -11,7 +11,7 @@ const LocalSubscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [authStatus, setAuthStatus] = useState<'authenticated' | 'unauthenticated' | 'checking'>('checking');
-  const [refreshFlag, setRefreshFlag] = useState(0); // Ajout d'un flag pour déclencher le rechargement
+  const [refreshFlag, setRefreshFlag] = useState(0); // Flag pour déclencher le rechargement
 
   // Check authentication status
   useEffect(() => {
@@ -160,7 +160,7 @@ const LocalSubscribers = () => {
         <AddSubscriberModal onSubscriberAdded={refreshSubscribers} />
       </PageHeader>
 
-      <SubscribersTable subscribers={subscribers} />
+      <SubscribersTable subscribers={subscribers} onRefresh={refreshSubscribers} />
     </div>
   );
 };

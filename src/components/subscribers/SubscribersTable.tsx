@@ -28,7 +28,10 @@ import {
   SearchIcon,
   ArrowDown,
   ArrowUp,
+  Trash2,
 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Subscriber {
   id: string;
@@ -45,9 +48,10 @@ export interface Subscriber {
 
 interface SubscribersTableProps {
   subscribers: Subscriber[];
+  onRefresh?: () => void;
 }
 
-export function SubscribersTable({ subscribers: initialSubscribers }: SubscribersTableProps) {
+export function SubscribersTable({ subscribers: initialSubscribers, onRefresh }: SubscribersTableProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<keyof Subscriber | null>(null);
@@ -115,6 +119,34 @@ export function SubscribersTable({ subscribers: initialSubscribers }: Subscriber
 
   const handleRowClick = (subscriberId: string) => {
     navigate(`/abonnes-locaux/${subscriberId}`);
+  };
+
+  const handleDeleteSubscriber = async (e: React.MouseEvent, subscriber: Subscriber) => {
+    e.stopPropagation();
+    if (confirm(`Êtes-vous sûr de vouloir supprimer l'abonné ${subscriber.nom} ${subscriber.prenom}?`)) {
+      try {
+        const { error } = await supabase
+          .from('local_subscribers')
+          .delete()
+          .eq('id', subscriber.id);
+          
+        if (error) throw error;
+        
+        toast({
+          title: "Suppression réussie",
+          description: `L'abonné ${subscriber.nom} ${subscriber.prenom} a été supprimé`,
+        });
+        
+        if (onRefresh) onRefresh();
+      } catch (error) {
+        console.error("Erreur lors de la suppression:", error);
+        toast({
+          variant: "destructive",
+          title: "Erreur de suppression",
+          description: "Impossible de supprimer l'abonné",
+        });
+      }
+    }
   };
 
   return (
@@ -192,6 +224,13 @@ export function SubscribersTable({ subscribers: initialSubscribers }: Subscriber
                         >
                           <Edit className="h-4 w-4 mr-2" />
                           Modifier
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={(e) => handleDeleteSubscriber(e, subscriber)}
+                          className="text-red-500 hover:text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Supprimer
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                           <FileText className="h-4 w-4 mr-2" />
