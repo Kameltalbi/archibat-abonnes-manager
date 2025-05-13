@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { InternationalSubscribersTable, InternationalSubscriber } from '@/components/subscribers/InternationalSubscribersTable';
@@ -21,7 +20,7 @@ const InternationalSubscribers = () => {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [authStatus, setAuthStatus] = useState<'authenticated' | 'unauthenticated' | 'checking'>('checking');
-  const [refreshFlag, setRefreshFlag] = useState(0); // Ajout d'un flag pour déclencher le rechargement
+  const [refreshFlag, setRefreshFlag] = useState(0); // Flag pour déclencher le rechargement
 
   // Check authentication status
   useEffect(() => {
@@ -112,7 +111,7 @@ const InternationalSubscribers = () => {
     } else if (authStatus === 'unauthenticated') {
       setLoading(false);
     }
-  }, [authStatus, refreshFlag]); // Ajout du refreshFlag aux dépendances
+  }, [authStatus, refreshFlag]);
 
   // Map the status to expected values
   const mapStatut = (statut: string): 'actif' | 'en_attente' | 'expire' => {
@@ -199,7 +198,7 @@ const InternationalSubscribers = () => {
         </Dialog>
       </PageHeader>
       
-      <InternationalSubscribersTable subscribers={subscribers} />
+      <InternationalSubscribersTable subscribers={subscribers} onRefresh={refreshSubscribers} />
     </div>
   );
 };

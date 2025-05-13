@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -28,7 +29,10 @@ import {
   ArrowDown,
   ArrowUp,
   Globe,
+  Trash2,
 } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/utils';
 
 export interface InternationalSubscriber {
@@ -47,9 +51,10 @@ export interface InternationalSubscriber {
 
 interface InternationalSubscribersTableProps {
   subscribers: InternationalSubscriber[];
+  onRefresh?: () => void;
 }
 
-export function InternationalSubscribersTable({ subscribers: initialSubscribers }: InternationalSubscribersTableProps) {
+export function InternationalSubscribersTable({ subscribers: initialSubscribers, onRefresh }: InternationalSubscribersTableProps) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<keyof InternationalSubscriber | null>(null);
@@ -118,6 +123,34 @@ export function InternationalSubscribersTable({ subscribers: initialSubscribers 
 
   const handleRowClick = (subscriberId: string) => {
     navigate(`/abonnes-internationaux/${subscriberId}`);
+  };
+
+  const handleDeleteSubscriber = async (e: React.MouseEvent, subscriber: InternationalSubscriber) => {
+    e.stopPropagation();
+    if (confirm(`Êtes-vous sûr de vouloir supprimer l'abonné ${subscriber.nom} ${subscriber.prenom}?`)) {
+      try {
+        const { error } = await supabase
+          .from('international_subscribers')
+          .delete()
+          .eq('id', subscriber.id);
+          
+        if (error) throw error;
+        
+        toast({
+          title: "Suppression réussie",
+          description: `L'abonné ${subscriber.nom} ${subscriber.prenom} a été supprimé`,
+        });
+        
+        if (onRefresh) onRefresh();
+      } catch (error) {
+        console.error("Erreur lors de la suppression:", error);
+        toast({
+          variant: "destructive",
+          title: "Erreur de suppression",
+          description: "Impossible de supprimer l'abonné",
+        });
+      }
+    }
   };
 
   return (
@@ -205,6 +238,13 @@ export function InternationalSubscribersTable({ subscribers: initialSubscribers 
                         >
                           <Edit className="h-4 w-4 mr-2" />
                           Modifier
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={(e) => handleDeleteSubscriber(e, subscriber)}
+                          className="text-red-500 hover:text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Supprimer
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                           <FileText className="h-4 w-4 mr-2" />
