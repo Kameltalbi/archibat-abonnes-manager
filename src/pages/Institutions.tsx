@@ -3,13 +3,19 @@ import React, { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { InstitutionsTable, Institution } from '@/components/institutions/InstitutionsTable';
 import { Building2 } from 'lucide-react';
-import { AddSubscriberModal } from '@/components/subscribers/AddSubscriberModal';
+import { AddInstitutionModal } from '@/components/institutions/AddInstitutionModal';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 const Institutions = () => {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshFlag, setRefreshFlag] = useState(0); // Pour déclencher le rechargement
+
+  // Fonction pour recharger les institutions
+  const refreshInstitutions = () => {
+    setRefreshFlag(prev => prev + 1);
+  };
 
   useEffect(() => {
     async function fetchInstitutions() {
@@ -50,7 +56,7 @@ const Institutions = () => {
     }
 
     fetchInstitutions();
-  }, []);
+  }, [refreshFlag]); // Ajout du refreshFlag aux dépendances pour déclencher le rechargement
 
   // Fonction pour mapper les types d'institutions aux valeurs attendues
   const mapInstitutionType = (type: string): 'Université' | 'École' | 'Institut' | 'Centre de recherche' | 'Autre' => {
@@ -83,7 +89,7 @@ const Institutions = () => {
         description="Gestion des institutions partenaires"
         icon={<Building2 className="h-6 w-6 text-blue-500" />}
       >
-        <AddSubscriberModal />
+        <AddInstitutionModal onInstitutionAdded={refreshInstitutions} />
       </PageHeader>
       
       <InstitutionsTable institutions={institutions} />
