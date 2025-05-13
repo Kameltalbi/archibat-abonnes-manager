@@ -130,7 +130,7 @@ export function AjouterVenteModal({ open, onOpenChange, onSubmit }: AjouterVente
                 name="montant"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Montant (XAF)</FormLabel>
+                    <FormLabel>Montant (TND)</FormLabel>
                     <FormControl>
                       <Input type="number" min="0" {...field} />
                     </FormControl>
