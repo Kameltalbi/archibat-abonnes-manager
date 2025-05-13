@@ -17,6 +17,7 @@ import Calendar from "./pages/Calendar";
 import WeeklyProgram from "./pages/WeeklyProgram";
 import Settings from "./pages/Settings";
 import Prospection from "./pages/Prospection";
+import NewSubscriber from "./pages/NewSubscriber";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,12 @@ const App = () => (
           <Route path="/abonnes-internationaux" element={
             <AppLayout>
               <InternationalSubscribers />
+            </AppLayout>
+          } />
+          {/* Add the new route for creating an international subscriber */}
+          <Route path="/abonnes-internationaux/nouveau" element={
+            <AppLayout>
+              <NewSubscriber />
             </AppLayout>
           } />
           <Route path="/institutions" element={
