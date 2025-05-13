@@ -205,7 +205,15 @@ export type Database = {
           updated_by?: string | null
           ville?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "international_subscribers_type_abonnement_id_fkey"
+            columns: ["type_abonnement_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       local_subscribers: {
         Row: {
@@ -265,7 +273,15 @@ export type Database = {
           updated_by?: string | null
           ville?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "local_subscribers_type_abonnement_id_fkey"
+            columns: ["type_abonnement_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       permissions: {
         Row: {

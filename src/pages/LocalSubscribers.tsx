@@ -16,9 +16,10 @@ const LocalSubscribers = () => {
       try {
         setLoading(true);
         
+        // Updated query to use the proper relationship syntax
         const { data, error } = await supabase
           .from('local_subscribers')
-          .select('*, type_abonnement_id(nom)')
+          .select('*, subscription_types(nom)')
           .order('nom');
           
         if (error) {
@@ -31,9 +32,7 @@ const LocalSubscribers = () => {
           prenom: sub.prenom,
           email: sub.email,
           telephone: sub.telephone || '',
-          typeAbonnement: typeof sub.type_abonnement_id === 'object' && sub.type_abonnement_id !== null 
-            ? (sub.type_abonnement_id as any).nom || 'Standard'
-            : 'Standard',
+          typeAbonnement: sub.subscription_types ? sub.subscription_types.nom : 'Standard',
           dateDebut: new Date(sub.date_debut).toLocaleDateString('fr-FR'),
           dateFin: new Date(sub.date_fin).toLocaleDateString('fr-FR'),
           montant: sub.montant,
