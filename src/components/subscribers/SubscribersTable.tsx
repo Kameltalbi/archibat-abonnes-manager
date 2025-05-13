@@ -172,9 +172,9 @@ export function SubscribersTable({ subscribers: initialSubscribers }: Subscriber
                   </TableCell>
                   <TableCell>{subscriber.email}</TableCell>
                   <TableCell>{subscriber.telephone}</TableCell>
-                  <TableCell>{subscriber.typeAbonnement}</TableCell>
+                  <TableCell>{subscriber.typeAbonnement || 'Non défini'}</TableCell>
                   <TableCell>{subscriber.dateFin}</TableCell>
-                  <TableCell>{subscriber.montant} DT</TableCell>
+                  <TableCell>{subscriber.montant !== undefined ? `${subscriber.montant} DT` : 'Non défini'}</TableCell>
                   <TableCell>{getStatusBadge(subscriber.statut)}</TableCell>
                   <TableCell>
                     <DropdownMenu>

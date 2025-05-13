@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -63,6 +62,8 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
   useEffect(() => {
     async function fetchSubscriptionTypes() {
       try {
+        console.log('Chargement des types d\'abonnement...');
+        
         const { data, error } = await supabase
           .from('subscription_types')
           .select('id, nom, duree, prix')
@@ -78,6 +79,7 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
           return;
         }
 
+        console.log('Types d\'abonnement récupérés:', data);
         setSubscriptionTypes(data || []);
         
         // Set default type if available
@@ -95,8 +97,10 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
   }, [form]);
 
   const onTypeChange = (typeId: string) => {
+    console.log('Type d\'abonnement changé pour:', typeId);
     const selectedType = subscriptionTypes.find(type => type.id === typeId);
     if (selectedType) {
+      console.log('Type sélectionné:', selectedType);
       form.setValue('duree', selectedType.duree);
       form.setValue('montant', selectedType.prix);
     }
@@ -296,7 +300,7 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
                       <SelectContent>
                         {subscriptionTypes.map((type) => (
                           <SelectItem key={type.id} value={type.id}>
-                            {type.nom}
+                            {type.nom} ({type.prix} DT / {type.duree} mois)
                           </SelectItem>
                         ))}
                       </SelectContent>

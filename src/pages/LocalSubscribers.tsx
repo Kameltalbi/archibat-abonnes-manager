@@ -41,6 +41,8 @@ const LocalSubscribers = () => {
           return;
         }
         
+        console.log('Chargement des abonnés locaux...');
+        
         // Make sure we're correctly selecting the subscription type data
         const { data, error } = await supabase
           .from('local_subscribers')
@@ -61,19 +63,25 @@ const LocalSubscribers = () => {
         
         console.log('Données brutes des abonnés:', data);
         
-        const formattedData: Subscriber[] = data.map(sub => ({
-          id: sub.id,
-          nom: sub.nom,
-          prenom: sub.prenom,
-          email: sub.email,
-          telephone: sub.telephone || '',
-          typeAbonnement: sub.subscription_types ? sub.subscription_types.nom : 'Standard',
-          dateDebut: new Date(sub.date_debut).toLocaleDateString('fr-FR'),
-          dateFin: new Date(sub.date_fin).toLocaleDateString('fr-FR'),
-          montant: sub.montant || (sub.subscription_types ? sub.subscription_types.prix : 0),
-          statut: mapStatut(sub.statut),
-        }));
+        const formattedData: Subscriber[] = data.map(sub => {
+          console.log('Formatage de l\'abonné:', sub);
+          console.log('Type d\'abonnement:', sub.subscription_types);
+          
+          return {
+            id: sub.id,
+            nom: sub.nom,
+            prenom: sub.prenom,
+            email: sub.email,
+            telephone: sub.telephone || '',
+            typeAbonnement: sub.subscription_types ? sub.subscription_types.nom : 'Standard',
+            dateDebut: new Date(sub.date_debut).toLocaleDateString('fr-FR'),
+            dateFin: new Date(sub.date_fin).toLocaleDateString('fr-FR'),
+            montant: sub.montant || (sub.subscription_types ? sub.subscription_types.prix : 0),
+            statut: mapStatut(sub.statut),
+          };
+        });
         
+        console.log('Données formatées des abonnés:', formattedData);
         setSubscribers(formattedData);
       } catch (error) {
         console.error('Erreur lors du chargement des abonnés locaux:', error);
