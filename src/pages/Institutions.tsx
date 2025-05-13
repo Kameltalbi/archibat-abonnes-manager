@@ -92,7 +92,7 @@ const Institutions = () => {
         <AddInstitutionModal onInstitutionAdded={refreshInstitutions} />
       </PageHeader>
       
-      <InstitutionsTable institutions={institutions} />
+      <InstitutionsTable institutions={institutions} onRefresh={refreshInstitutions} />
     </div>
   );
 };
