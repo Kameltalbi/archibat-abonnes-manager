@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { InstitutionForm } from './InstitutionForm';
+import { SubscriberForm } from '../subscribers/SubscriberForm';
 import { Plus } from 'lucide-react';
 
 interface AddInstitutionModalProps {
@@ -38,7 +38,7 @@ export function AddInstitutionModal({ onInstitutionAdded }: AddInstitutionModalP
         <DialogHeader>
           <DialogTitle>Nouvelle institution abonnée</DialogTitle>
         </DialogHeader>
-        <InstitutionForm onClose={handleClose} />
+        <SubscriberForm onClose={handleClose} isInstitution={true} />
       </DialogContent>
     </Dialog>
   );

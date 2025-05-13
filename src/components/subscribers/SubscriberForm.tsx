@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -21,7 +22,7 @@ import { addMonths, format } from 'date-fns';
 // Define the schema for form validation
 const subscriberSchema = z.object({
   nom: z.string().min(2, { message: 'Le nom doit contenir au moins 2 caractères' }),
-  prenom: z.string().min(2, { message: 'Le prénom doit contenir au moins 2 caractères' }),
+  prenom: z.string().min(2, { message: 'Le prénom doit contenir au moins 2 caractères' }).optional(),
   email: z.string().email({ message: 'L\'adresse email est invalide' }),
   telephone: z.string().optional(),
   typeAbonnement: z.string(),
@@ -29,6 +30,10 @@ const subscriberSchema = z.object({
   duree: z.number().min(1, { message: 'La durée doit être d\'au moins 1 mois' }),
   montant: z.number().min(0, { message: 'Le montant doit être positif' }),
   pays: z.string().optional(),
+  type: z.string().optional(), // Type d'institution
+  adresse: z.string().optional(),
+  contact: z.string().optional(),
+  statut: z.string().default('en_attente'),
 });
 
 export type SubscriberFormValues = z.infer<typeof subscriberSchema>;
@@ -36,9 +41,10 @@ export type SubscriberFormValues = z.infer<typeof subscriberSchema>;
 interface SubscriberFormProps {
   onClose?: () => void;
   isInternational?: boolean;
+  isInstitution?: boolean;
 }
 
-export function SubscriberForm({ onClose, isInternational = false }: SubscriberFormProps) {
+export function SubscriberForm({ onClose, isInternational = false, isInstitution = false }: SubscriberFormProps) {
   const [loading, setLoading] = useState(false);
   const [subscriptionTypes, setSubscriptionTypes] = useState<{id: string, nom: string, duree: number, prix: number}[]>([]);
 
@@ -47,7 +53,7 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
     resolver: zodResolver(subscriberSchema),
     defaultValues: {
       nom: '',
-      prenom: '',
+      prenom: isInstitution ? undefined : '',
       email: '',
       telephone: '',
       typeAbonnement: '',
@@ -55,6 +61,10 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
       duree: 12,
       montant: 0,
       pays: isInternational ? '' : 'Tunisie',
+      type: isInstitution ? '' : undefined,
+      adresse: '',
+      contact: isInstitution ? '' : undefined,
+      statut: 'en_attente',
     },
   });
 
@@ -137,53 +147,94 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
       // Calculate end date based on start date and duration
       const startDate = new Date(values.dateDebut);
       const endDate = addMonths(startDate, values.duree);
-
-      // Prepare data for Supabase insert
-      const subscriberData = {
-        nom: values.nom,
-        prenom: values.prenom,
-        email: values.email,
-        telephone: values.telephone || null,
-        type_abonnement_id: values.typeAbonnement,
-        date_debut: values.dateDebut,
-        date_fin: format(endDate, 'yyyy-MM-dd'),
-        montant: values.montant,
-        statut: 'actif',
-        created_by: session.user.id,
-      };
-
-      // Insert into the appropriate table based on isInternational flag
-      const tableName = isInternational ? 'international_subscribers' : 'local_subscribers';
       
-      // Add pays field for international subscribers
-      const finalData = isInternational 
-        ? { ...subscriberData, pays: values.pays || 'Non spécifié' }
-        : subscriberData;
-      
-      console.log('Enregistrement de l\'abonné dans la table:', tableName);
-      console.log('Données:', finalData);
-
-      const { data, error } = await supabase
-        .from(tableName)
-        .insert([finalData])
-        .select();
-
-      if (error) {
-        console.error(`Erreur lors de l'enregistrement de l'abonné dans ${tableName}:`, error);
+      if (isInstitution) {
+        // Enregistrer une institution
+        const institutionData = {
+          nom: values.nom,
+          type: values.type || 'Autre',
+          adresse: values.adresse || null,
+          telephone: values.telephone || null,
+          email: values.email,
+          contact: values.contact || null,
+          date_adhesion: values.dateDebut,
+          statut: values.statut,
+          created_by: session.user.id,
+        };
+        
+        console.log('Enregistrement de l\'institution:', institutionData);
+        
+        const { data, error } = await supabase
+          .from('institutions')
+          .insert([institutionData])
+          .select();
+          
+        if (error) {
+          console.error('Erreur lors de l\'enregistrement de l\'institution:', error);
+          toast({
+            title: "Erreur",
+            description: `Impossible d'enregistrer l'institution: ${error.message}`,
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        console.log('Institution enregistrée avec succès:', data);
+        
         toast({
-          title: "Erreur",
-          description: `Impossible d'enregistrer l'abonné: ${error.message}`,
-          variant: "destructive",
+          title: "Succès",
+          description: "Institution ajoutée avec succès",
         });
-        return;
-      }
+      } else {
+        // Enregistrer un abonné (local ou international)
+        
+        // Prepare data for Supabase insert
+        const subscriberData = {
+          nom: values.nom,
+          prenom: values.prenom || '',
+          email: values.email,
+          telephone: values.telephone || null,
+          type_abonnement_id: values.typeAbonnement,
+          date_debut: values.dateDebut,
+          date_fin: format(endDate, 'yyyy-MM-dd'),
+          montant: values.montant,
+          statut: 'actif',
+          created_by: session.user.id,
+        };
 
-      console.log('Abonné enregistré avec succès:', data);
-      
-      toast({
-        title: "Succès",
-        description: "Abonné ajouté avec succès",
-      });
+        // Insert into the appropriate table based on isInternational flag
+        const tableName = isInternational ? 'international_subscribers' : 'local_subscribers';
+        
+        // Add pays field for international subscribers
+        const finalData = isInternational 
+          ? { ...subscriberData, pays: values.pays || 'Non spécifié' }
+          : subscriberData;
+        
+        console.log('Enregistrement de l\'abonné dans la table:', tableName);
+        console.log('Données:', finalData);
+
+        const { data, error } = await supabase
+          .from(tableName)
+          .insert([finalData])
+          .select();
+
+        if (error) {
+          console.error(`Erreur lors de l'enregistrement de l'abonné dans ${tableName}:`, error);
+          toast({
+            title: "Erreur",
+            description: `Impossible d'enregistrer l'abonné: ${error.message}`,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        console.log('Abonné enregistré avec succès:', data);
+        
+        toast({
+          title: "Succès",
+          description: "Abonné ajouté avec succès",
+        });
+      }
 
       // Close the form/modal if onClose prop is provided
       if (onClose) {
@@ -193,10 +244,10 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
         form.reset();
       }
     } catch (error) {
-      console.error('Erreur lors de l\'ajout de l\'abonné:', error);
+      console.error('Erreur lors de l\'ajout:', error);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'ajout de l'abonné",
+        description: "Une erreur est survenue lors de l'ajout",
         variant: "destructive",
       });
     } finally {
@@ -215,27 +266,59 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
                 name="nom"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Nom</FormLabel>
+                    <FormLabel>{isInstitution ? "Nom de l'institution" : "Nom"}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Nom" {...field} />
+                      <Input placeholder={isInstitution ? "Université de Tunis" : "Nom"} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="prenom"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prénom</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Prénom" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              
+              {isInstitution ? (
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type d'institution</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionnez un type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Université">Université</SelectItem>
+                          <SelectItem value="École">École</SelectItem>
+                          <SelectItem value="Institut">Institut</SelectItem>
+                          <SelectItem value="Centre de recherche">Centre de recherche</SelectItem>
+                          <SelectItem value="Autre">Autre</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="prenom"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Prénom</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Prénom" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              
               <FormField
                 control={form.control}
                 name="email"
@@ -249,6 +332,7 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
                   </FormItem>
                 )}
               />
+              
               <FormField
                 control={form.control}
                 name="telephone"
@@ -272,6 +356,38 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
                       <FormLabel>Pays</FormLabel>
                       <FormControl>
                         <Input placeholder="Pays" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              
+              {isInstitution && (
+                <FormField
+                  control={form.control}
+                  name="adresse"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adresse</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Adresse complète" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              
+              {isInstitution && (
+                <FormField
+                  control={form.control}
+                  name="contact"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Personne à contacter</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nom et prénom" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -309,12 +425,13 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
                   </FormItem>
                 )}
               />
+              
               <FormField
                 control={form.control}
                 name="dateDebut"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Date de début</FormLabel>
+                    <FormLabel>{isInstitution ? "Date d'adhésion" : "Date de début"}</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -322,24 +439,28 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="duree"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Durée (mois)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        min={1} 
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              
+              {!isInstitution && (
+                <FormField
+                  control={form.control}
+                  name="duree"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Durée (mois)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          min={1} 
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+              
               <FormField
                 control={form.control}
                 name="montant"
@@ -359,6 +480,34 @@ export function SubscriberForm({ onClose, isInternational = false }: SubscriberF
                   </FormItem>
                 )}
               />
+              
+              {isInstitution && (
+                <FormField
+                  control={form.control}
+                  name="statut"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Statut</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sélectionnez un statut" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="actif">Actif</SelectItem>
+                          <SelectItem value="inactif">Inactif</SelectItem>
+                          <SelectItem value="en_attente">En attente</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
             </div>
 
             <div className="flex justify-end space-x-2">
