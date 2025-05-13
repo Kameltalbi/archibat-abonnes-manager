@@ -55,6 +55,12 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+// Define props interface for the SubscriberForm component
+interface SubscriberFormProps {
+  onClose?: () => void;
+  isInternational?: boolean;
+}
+
 const dureeOptions = [
   { value: "12", label: "12 mois" },
   { value: "24", label: "24 mois" },
@@ -72,7 +78,7 @@ const modePaiementOptions = [
 // Prix mensuel par défaut pour calculer le montant
 const PRIX_MENSUEL = 10; // en DT
 
-export function SubscriberForm({ onClose }: { onClose?: () => void }) {
+export function SubscriberForm({ onClose, isInternational = false }: SubscriberFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -83,7 +89,7 @@ export function SubscriberForm({ onClose }: { onClose?: () => void }) {
       adresse: '',
       ville: '',
       codePostal: '',
-      pays: 'Tunisie',
+      pays: isInternational ? '' : 'Tunisie', // Default to empty for international subscribers
       dateDebut: new Date(),
       duree: '12',
       montant: 12 * PRIX_MENSUEL,
@@ -108,7 +114,13 @@ export function SubscriberForm({ onClose }: { onClose?: () => void }) {
 
   function onSubmit(data: FormValues) {
     console.log('Form submitted:', data);
-    toast.success('Abonné ajouté avec succès!');
+    
+    // Show different message based on subscriber type
+    toast.success(isInternational ? 
+      'Abonné international ajouté avec succès!' : 
+      'Abonné ajouté avec succès!'
+    );
+    
     form.reset();
     if (onClose) onClose();
   }

@@ -26,7 +26,7 @@ export function AddSubscriberModal() {
         <DialogHeader>
           <DialogTitle>Nouvel abonnement</DialogTitle>
         </DialogHeader>
-        <SubscriberForm onClose={() => setOpen(false)} />
+        <SubscriberForm onClose={() => setOpen(false)} isInternational={false} />
       </DialogContent>
     </Dialog>
   );
