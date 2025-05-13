@@ -86,15 +86,27 @@ export function AddSubscriptionTypeModal({ isOpen, onClose, onSubmit }: AddSubsc
       console.log('Types d\'abonnement récupérés:', data);
       
       // Map the data from Supabase to match our SubscriptionType interface
-      const mappedTypes: SubscriptionType[] = data.map(item => ({
-        id: item.id,
-        nom: item.nom,
-        description: item.description || '',
-        duree: item.duree,
-        prix: item.prix,
-        typeLecteur: item.type_lecteur, // Map from type_lecteur to typeLecteur
-        actif: item.actif || true
-      }));
+      // Ensure typeLecteur is properly typed as one of the allowed values
+      const mappedTypes: SubscriptionType[] = data.map(item => {
+        // Validate type_lecteur is one of the allowed values
+        let typeLecteur: 'particulier' | 'etudiant' | 'institution' = 'particulier';
+        
+        if (item.type_lecteur === 'particulier' || 
+            item.type_lecteur === 'etudiant' || 
+            item.type_lecteur === 'institution') {
+          typeLecteur = item.type_lecteur as 'particulier' | 'etudiant' | 'institution';
+        }
+        
+        return {
+          id: item.id,
+          nom: item.nom,
+          description: item.description || '',
+          duree: item.duree,
+          prix: item.prix,
+          typeLecteur: typeLecteur,
+          actif: item.actif ?? true
+        };
+      });
       
       setSubscriptionTypes(mappedTypes);
     } catch (error) {
