@@ -46,6 +46,7 @@ const Calendar = () => {
       if (error) throw error;
 
       if (data) {
+        console.log("Fetched events:", data);
         const mappedEvents: CalendarEvent[] = data.map(event => ({
           id: event.id,
           title: event.title,
@@ -56,6 +57,7 @@ const Calendar = () => {
           description: event.description
         }));
         
+        console.log("Mapped events:", mappedEvents);
         setEvents(mappedEvents);
       }
     } catch (error: any) {
