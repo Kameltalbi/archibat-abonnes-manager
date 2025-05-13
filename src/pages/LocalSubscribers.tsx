@@ -11,6 +11,7 @@ const LocalSubscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [authStatus, setAuthStatus] = useState<'authenticated' | 'unauthenticated' | 'checking'>('checking');
+  const [refreshFlag, setRefreshFlag] = useState(0); // Ajout d'un flag pour déclencher le rechargement
 
   // Check authentication status
   useEffect(() => {
@@ -31,6 +32,12 @@ const LocalSubscribers = () => {
     };
   }, []);
 
+  // Fonction pour recharger les abonnés
+  const refreshSubscribers = () => {
+    setRefreshFlag(prev => prev + 1);
+  };
+
+  // Effet pour charger les abonnés
   useEffect(() => {
     async function fetchSubscribers() {
       try {
@@ -100,7 +107,7 @@ const LocalSubscribers = () => {
     } else if (authStatus === 'unauthenticated') {
       setLoading(false);
     }
-  }, [authStatus]);
+  }, [authStatus, refreshFlag]); // Ajout du refreshFlag aux dépendances
 
   // Fonction pour mapper le statut aux valeurs attendues
   const mapStatut = (statut: string): 'actif' | 'en_attente' | 'expire' => {
@@ -150,7 +157,7 @@ const LocalSubscribers = () => {
         description="Gestion des abonnés en Tunisie"
         icon={<UserIcon className="h-6 w-6 text-blue-500" />}
       >
-        <AddSubscriberModal />
+        <AddSubscriberModal onSubscriberAdded={refreshSubscribers} />
       </PageHeader>
 
       <SubscribersTable subscribers={subscribers} />

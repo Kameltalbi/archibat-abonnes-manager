@@ -21,6 +21,7 @@ const InternationalSubscribers = () => {
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [authStatus, setAuthStatus] = useState<'authenticated' | 'unauthenticated' | 'checking'>('checking');
+  const [refreshFlag, setRefreshFlag] = useState(0); // Ajout d'un flag pour déclencher le rechargement
 
   // Check authentication status
   useEffect(() => {
@@ -40,6 +41,11 @@ const InternationalSubscribers = () => {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Fonction pour recharger les abonnés
+  const refreshSubscribers = () => {
+    setRefreshFlag(prev => prev + 1);
+  };
 
   useEffect(() => {
     async function fetchSubscribers() {
@@ -106,7 +112,7 @@ const InternationalSubscribers = () => {
     } else if (authStatus === 'unauthenticated') {
       setLoading(false);
     }
-  }, [authStatus]);
+  }, [authStatus, refreshFlag]); // Ajout du refreshFlag aux dépendances
 
   // Map the status to expected values
   const mapStatut = (statut: string): 'actif' | 'en_attente' | 'expire' => {
@@ -156,7 +162,7 @@ const InternationalSubscribers = () => {
         <h2 className="text-xl font-semibold">Une erreur est survenue</h2>
         <p className="text-gray-500">{error}</p>
         <button 
-          onClick={() => window.location.reload()} 
+          onClick={() => refreshSubscribers()} 
           className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
         >
           Réessayer
@@ -164,6 +170,11 @@ const InternationalSubscribers = () => {
       </div>
     );
   }
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    refreshSubscribers(); // Rafraîchir la liste après la fermeture du modal
+  };
 
   return (
     <div>
@@ -183,7 +194,7 @@ const InternationalSubscribers = () => {
             <DialogHeader>
               <DialogTitle>Nouvel abonné international</DialogTitle>
             </DialogHeader>
-            <SubscriberForm onClose={() => setModalOpen(false)} isInternational={true} />
+            <SubscriberForm onClose={handleModalClose} isInternational={true} />
           </DialogContent>
         </Dialog>
       </PageHeader>

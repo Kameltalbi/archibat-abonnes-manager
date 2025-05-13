@@ -11,8 +11,20 @@ import {
 import { SubscriberForm } from './SubscriberForm';
 import { Plus } from 'lucide-react';
 
-export function AddSubscriberModal() {
+interface AddSubscriberModalProps {
+  onSubscriberAdded?: () => void;
+}
+
+export function AddSubscriberModal({ onSubscriberAdded }: AddSubscriberModalProps) {
   const [open, setOpen] = useState(false);
+  
+  const handleClose = () => {
+    setOpen(false);
+    // Appeler la fonction de rafraîchissement si elle existe
+    if (onSubscriberAdded) {
+      onSubscriberAdded();
+    }
+  };
   
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -26,7 +38,7 @@ export function AddSubscriberModal() {
         <DialogHeader>
           <DialogTitle>Nouvel abonnement</DialogTitle>
         </DialogHeader>
-        <SubscriberForm onClose={() => setOpen(false)} isInternational={false} />
+        <SubscriberForm onClose={handleClose} isInternational={false} />
       </DialogContent>
     </Dialog>
   );
