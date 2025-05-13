@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, startOfMonth, endOfMonth, isEqual } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +29,7 @@ import { CalendarEventModal, CalendarEvent } from '@/components/calendar/Calenda
 const Calendar = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [displayedEvents, setDisplayedEvents] = useState<CalendarEvent[]>([]);
   const [isAddEventModalOpen, setIsAddEventModalOpen] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | undefined>(undefined);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
@@ -41,7 +42,8 @@ const Calendar = () => {
     try {
       const { data, error } = await supabase
         .from('calendar_events')
-        .select('*');
+        .select('*')
+        .order('date', { ascending: true });
 
       if (error) throw error;
 
@@ -59,6 +61,9 @@ const Calendar = () => {
         
         console.log("Mapped events:", mappedEvents);
         setEvents(mappedEvents);
+        
+        // Automatically filter events for the current month
+        filterEventsForCurrentMonth(mappedEvents, date || new Date());
       }
     } catch (error: any) {
       console.error('Error fetching events:', error);
@@ -72,11 +77,33 @@ const Calendar = () => {
     }
   };
 
+  // Filter events for the current month
+  const filterEventsForCurrentMonth = (allEvents: CalendarEvent[], currentDate: Date) => {
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+    
+    const filteredEvents = allEvents.filter(event => 
+      event.date >= monthStart && event.date <= monthEnd
+    );
+    
+    // Sort by date
+    filteredEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
+    
+    console.log("Filtered events for month:", filteredEvents);
+    setDisplayedEvents(filteredEvents);
+  };
+
   useEffect(() => {
     fetchEvents();
   }, []);
 
-  // Filter events for the selected date
+  useEffect(() => {
+    if (date && events.length > 0) {
+      filterEventsForCurrentMonth(events, date);
+    }
+  }, [date, events]);
+
+  // Filter events for the selected date (for the day view)
   const eventsForSelectedDate = date 
     ? events.filter(event => 
         event.date.getDate() === date.getDate() &&
@@ -186,17 +213,11 @@ const Calendar = () => {
             </CardContent>
           </Card>
 
-          {/* Events for Selected Date */}
+          {/* Events Card - Now shows all events for the current month */}
           <Card>
             <CardHeader className="flex flex-col space-y-1.5">
               <CardTitle>
-                {date ? (
-                  <>
-                    Événements du {format(date, "d MMMM yyyy", { locale: fr })}
-                  </>
-                ) : (
-                  "Événements"
-                )}
+                Événements du mois {date ? format(date, "MMMM yyyy", { locale: fr }) : ''}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -204,10 +225,18 @@ const Calendar = () => {
                 <div className="flex items-center justify-center py-10">
                   <Loader2 className="h-8 w-8 animate-spin text-archibat-blue" />
                 </div>
-              ) : eventsForSelectedDate.length > 0 ? (
+              ) : displayedEvents.length > 0 ? (
                 <div className="space-y-4">
-                  {eventsForSelectedDate.map((event) => (
-                    <div key={event.id} className="border rounded-lg p-4 hover:bg-accent/10 transition-colors">
+                  {displayedEvents.map((event) => (
+                    <div 
+                      key={event.id} 
+                      className={`border rounded-lg p-4 hover:bg-accent/10 transition-colors ${
+                        date && isEqual(
+                          new Date(event.date.getFullYear(), event.date.getMonth(), event.date.getDate()),
+                          new Date(date.getFullYear(), date.getMonth(), date.getDate())
+                        ) ? 'border-archibat-blue border-2 bg-blue-50' : ''
+                      }`}
+                    >
                       <div className="flex items-center justify-between">
                         <h3 className="font-medium text-lg">{event.title}</h3>
                         <div className="flex gap-2">
@@ -230,6 +259,9 @@ const Calendar = () => {
                       </div>
                       
                       <div className="mt-2 text-sm text-muted-foreground space-y-1">
+                        <div className="font-medium">
+                          {format(event.date, "EEEE d MMMM yyyy", { locale: fr })}
+                        </div>
                         <div className="flex items-center">
                           <ClockIcon className="h-4 w-4 mr-2" />
                           {event.startTime} - {event.endTime}
@@ -252,7 +284,7 @@ const Calendar = () => {
               ) : (
                 <div className="text-center py-10 text-muted-foreground">
                   <CalendarDaysIcon className="h-10 w-10 mx-auto mb-3 opacity-50" />
-                  <p>Aucun événement pour cette date</p>
+                  <p>Aucun événement pour ce mois</p>
                   <Button 
                     variant="outline" 
                     className="mt-4"
