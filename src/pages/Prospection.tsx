@@ -44,6 +44,7 @@ const Prospection = () => {
       const formattedData: ProspectionItem[] = data.map(item => ({
         id: item.id,
         contactName: item.contact_name,
+        phone: item.phone || '',
         date: item.date,
         time: item.time,
         type: item.type,
@@ -102,6 +103,7 @@ const Prospection = () => {
         .insert([
           {
             contact_name: newProspection.contactName,
+            phone: newProspection.phone,
             date: newProspection.date,
             time: newProspection.time,
             type: newProspection.type,
@@ -117,6 +119,7 @@ const Prospection = () => {
         const formattedProspection: ProspectionItem = {
           id: data[0].id,
           contactName: data[0].contact_name,
+          phone: data[0].phone || '',
           date: data[0].date,
           time: data[0].time,
           type: data[0].type,

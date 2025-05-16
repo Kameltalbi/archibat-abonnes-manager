@@ -7,7 +7,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { CalendarIcon, UserIcon } from "lucide-react";
+import { CalendarIcon, UserIcon, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Contact } from './ContactSelector';
 
@@ -21,6 +21,7 @@ export function ProspectionForm({ onSubmit, onCancel, selectedContact }: Prospec
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [formData, setFormData] = useState({
     contactName: '',
+    phone: '',
     time: '',
     type: 'Appel téléphonique',
     notes: '',
@@ -32,7 +33,8 @@ export function ProspectionForm({ onSubmit, onCancel, selectedContact }: Prospec
     if (selectedContact) {
       setFormData(prev => ({
         ...prev,
-        contactName: selectedContact.name
+        contactName: selectedContact.name,
+        phone: selectedContact.phone || ''
       }));
     }
   }, [selectedContact]);
@@ -75,6 +77,21 @@ export function ProspectionForm({ onSubmit, onCancel, selectedContact }: Prospec
               {selectedContact.phone} • {selectedContact.email}
             </p>
           )}
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="phone">Numéro de téléphone</Label>
+          <div className="relative">
+            <Input 
+              id="phone" 
+              name="phone"
+              placeholder="Entrez le numéro de téléphone" 
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="pl-10"
+            />
+            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          </div>
         </div>
         
         <div className="grid grid-cols-2 gap-4">

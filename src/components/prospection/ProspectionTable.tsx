@@ -1,13 +1,14 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Trash2, ExternalLink } from 'lucide-react';
+import { Trash2, ExternalLink, Phone } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
 export interface ProspectionItem {
-  id: string;  // Changed to just string to match Supabase UUIDs
+  id: string;
   contactName: string;
+  phone?: string;
   date: string;
   time: string;
   type: string;
@@ -46,6 +47,7 @@ export function ProspectionTable({ data, onDelete }: ProspectionTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Contact</TableHead>
+            <TableHead>Téléphone</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Heure</TableHead>
             <TableHead>Type</TableHead>
@@ -56,7 +58,7 @@ export function ProspectionTable({ data, onDelete }: ProspectionTableProps) {
         <TableBody>
           {data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+              <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                 Aucune activité de prospection
               </TableCell>
             </TableRow>
@@ -64,6 +66,16 @@ export function ProspectionTable({ data, onDelete }: ProspectionTableProps) {
             data.map((row) => (
               <TableRow key={row.id}>
                 <TableCell className="font-medium">{row.contactName}</TableCell>
+                <TableCell>
+                  {row.phone ? (
+                    <div className="flex items-center">
+                      <Phone size={14} className="mr-1 text-archibat-blue" />
+                      <span>{row.phone}</span>
+                    </div>
+                  ) : (
+                    <span className="text-sm text-muted-foreground italic">Non précisé</span>
+                  )}
+                </TableCell>
                 <TableCell>{formatDate(row.date)}</TableCell>
                 <TableCell>{row.time}</TableCell>
                 <TableCell>

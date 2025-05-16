@@ -347,6 +347,7 @@ export type Database = {
           date: string
           id: string
           notes: string | null
+          phone: string | null
           result: string | null
           time: string
           type: string
@@ -360,6 +361,7 @@ export type Database = {
           date: string
           id?: string
           notes?: string | null
+          phone?: string | null
           result?: string | null
           time: string
           type: string
@@ -373,6 +375,7 @@ export type Database = {
           date?: string
           id?: string
           notes?: string | null
+          phone?: string | null
           result?: string | null
           time?: string
           type?: string
