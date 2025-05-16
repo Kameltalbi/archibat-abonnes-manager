@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -8,15 +8,17 @@ import {
 } from "@/components/ui/dialog";
 import { Contact } from './ContactSelector';
 import { ProspectionForm } from './ProspectionForm';
+import { ProspectionItem } from './ProspectionTable';
 
 interface AddProspectionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdd: (data: any) => void;
   selectedContact?: Contact | null;
+  editingProspection?: ProspectionItem | null;
 }
 
-export function AddProspectionModal({ open, onOpenChange, onAdd, selectedContact }: AddProspectionModalProps) {
+export function AddProspectionModal({ open, onOpenChange, onAdd, selectedContact, editingProspection }: AddProspectionModalProps) {
   const handleFormSubmit = (data: any) => {
     onAdd(data);
     onOpenChange(false);
@@ -31,9 +33,11 @@ export function AddProspectionModal({ open, onOpenChange, onAdd, selectedContact
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl">
-            {selectedContact 
-              ? `Contacter ${selectedContact.name}`
-              : 'Ajouter un appel ou rendez-vous'
+            {editingProspection
+              ? `Modifier l'action de prospection`
+              : selectedContact 
+                ? `Contacter ${selectedContact.name}`
+                : 'Ajouter un appel ou rendez-vous'
             }
           </DialogTitle>
         </DialogHeader>
@@ -41,6 +45,7 @@ export function AddProspectionModal({ open, onOpenChange, onAdd, selectedContact
           onSubmit={handleFormSubmit}
           onCancel={handleCancel}
           selectedContact={selectedContact}
+          editingProspection={editingProspection}
         />
       </DialogContent>
     </Dialog>
