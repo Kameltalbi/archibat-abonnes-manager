@@ -1,9 +1,15 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Trash2, ExternalLink, Phone } from 'lucide-react';
+import { Trash2, ExternalLink, Phone, Edit } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { 
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger
+} from '@/components/ui/context-menu';
 
 export interface ProspectionItem {
   id: string;
@@ -19,9 +25,10 @@ export interface ProspectionItem {
 interface ProspectionTableProps {
   data: ProspectionItem[];
   onDelete: (id: string) => void;
+  onEdit?: (item: ProspectionItem) => void;
 }
 
-export function ProspectionTable({ data, onDelete }: ProspectionTableProps) {
+export function ProspectionTable({ data, onDelete, onEdit }: ProspectionTableProps) {
   const getTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
       case 'appel':
@@ -64,41 +71,71 @@ export function ProspectionTable({ data, onDelete }: ProspectionTableProps) {
             </TableRow>
           ) : (
             data.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell className="font-medium">{row.contactName}</TableCell>
-                <TableCell>
-                  {row.phone ? (
-                    <div className="flex items-center">
-                      <Phone size={14} className="mr-1 text-archibat-blue" />
-                      <span>{row.phone}</span>
-                    </div>
-                  ) : (
-                    <span className="text-sm text-muted-foreground italic">Non précisé</span>
+              <ContextMenu key={row.id}>
+                <ContextMenuTrigger asChild>
+                  <TableRow className="cursor-default">
+                    <TableCell className="font-medium">{row.contactName}</TableCell>
+                    <TableCell>
+                      {row.phone ? (
+                        <div className="flex items-center">
+                          <Phone size={14} className="mr-1 text-archibat-blue" />
+                          <span>{row.phone}</span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground italic">Non précisé</span>
+                      )}
+                    </TableCell>
+                    <TableCell>{formatDate(row.date)}</TableCell>
+                    <TableCell>{row.time}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={getTypeColor(row.type)}>{row.type}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      {row.result ? (
+                        <span className="text-sm">{row.result}</span>
+                      ) : (
+                        <span className="text-sm text-muted-foreground italic">Non précisé</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => onDelete(row.id)} 
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                        {onEdit && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => onEdit(row)}
+                          >
+                            <Edit size={16} />
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon">
+                          <ExternalLink size={16} />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                </ContextMenuTrigger>
+                <ContextMenuContent className="bg-white">
+                  {onEdit && (
+                    <ContextMenuItem onClick={() => onEdit(row)} className="flex items-center gap-2">
+                      <Edit size={16} />
+                      Modifier
+                    </ContextMenuItem>
                   )}
-                </TableCell>
-                <TableCell>{formatDate(row.date)}</TableCell>
-                <TableCell>{row.time}</TableCell>
-                <TableCell>
-                  <Badge variant="outline" className={getTypeColor(row.type)}>{row.type}</Badge>
-                </TableCell>
-                <TableCell>
-                  {row.result ? (
-                    <span className="text-sm">{row.result}</span>
-                  ) : (
-                    <span className="text-sm text-muted-foreground italic">Non précisé</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(row.id)} className="text-red-500 hover:text-red-700">
-                      <Trash2 size={16} />
-                    </Button>
-                    <Button variant="ghost" size="icon">
-                      <ExternalLink size={16} />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+                  <ContextMenuItem onClick={() => onDelete(row.id)} className="flex items-center gap-2 text-red-500">
+                    <Trash2 size={16} />
+                    Supprimer
+                  </ContextMenuItem>
+                </ContextMenuContent>
+              </ContextMenu>
             ))
           )}
         </TableBody>

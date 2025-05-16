@@ -23,6 +23,7 @@ const Prospection = () => {
     prospection: true,
     contacts: true
   });
+  const [editingProspection, setEditingProspection] = useState<ProspectionItem | null>(null);
   
   useEffect(() => {
     // Fetch prospection data and contacts
@@ -98,10 +99,11 @@ const Prospection = () => {
 
   const handleAddProspection = async (newProspection: Omit<ProspectionItem, 'id'>) => {
     try {
-      const { data, error } = await supabase
-        .from('prospection')
-        .insert([
-          {
+      if (editingProspection) {
+        // Update existing prospection
+        const { data, error } = await supabase
+          .from('prospection')
+          .update({
             contact_name: newProspection.contactName,
             phone: newProspection.phone,
             date: newProspection.date,
@@ -109,36 +111,80 @@ const Prospection = () => {
             type: newProspection.type,
             notes: newProspection.notes,
             result: newProspection.result
-          }
-        ])
-        .select();
+          })
+          .eq('id', editingProspection.id)
+          .select();
+          
+        if (error) throw error;
         
-      if (error) throw error;
-      
-      if (data && data[0]) {
-        const formattedProspection: ProspectionItem = {
-          id: data[0].id,
-          contactName: data[0].contact_name,
-          phone: data[0].phone || '',
-          date: data[0].date,
-          time: data[0].time,
-          type: data[0].type,
-          notes: data[0].notes || '',
-          result: data[0].result || ''
-        };
+        if (data && data[0]) {
+          const updatedProspection: ProspectionItem = {
+            id: data[0].id,
+            contactName: data[0].contact_name,
+            phone: data[0].phone || '',
+            date: data[0].date,
+            time: data[0].time,
+            type: data[0].type,
+            notes: data[0].notes || '',
+            result: data[0].result || ''
+          };
+          
+          setProspectionData(prospectionData.map(item => 
+            item.id === updatedProspection.id ? updatedProspection : item
+          ));
+          
+          toast({
+            title: "Prospection mise à jour",
+            description: "L'activité de prospection a été mise à jour avec succès",
+          });
+        }
+      } else {
+        // Add new prospection
+        const { data, error } = await supabase
+          .from('prospection')
+          .insert([
+            {
+              contact_name: newProspection.contactName,
+              phone: newProspection.phone,
+              date: newProspection.date,
+              time: newProspection.time,
+              type: newProspection.type,
+              notes: newProspection.notes,
+              result: newProspection.result
+            }
+          ])
+          .select();
+          
+        if (error) throw error;
         
-        setProspectionData([formattedProspection, ...prospectionData]);
-        
-        toast({
-          title: "Prospection ajoutée",
-          description: "L'activité de prospection a été enregistrée avec succès",
-        });
+        if (data && data[0]) {
+          const formattedProspection: ProspectionItem = {
+            id: data[0].id,
+            contactName: data[0].contact_name,
+            phone: data[0].phone || '',
+            date: data[0].date,
+            time: data[0].time,
+            type: data[0].type,
+            notes: data[0].notes || '',
+            result: data[0].result || ''
+          };
+          
+          setProspectionData([formattedProspection, ...prospectionData]);
+          
+          toast({
+            title: "Prospection ajoutée",
+            description: "L'activité de prospection a été enregistrée avec succès",
+          });
+        }
       }
+      
+      // Reset editing state
+      setEditingProspection(null);
     } catch (error) {
-      console.error('Erreur lors de l\'ajout de la prospection:', error);
+      console.error('Erreur lors de l\'ajout/mise à jour de la prospection:', error);
       toast({
         title: "Erreur",
-        description: "Impossible d'ajouter l'activité de prospection",
+        description: "Impossible d'ajouter/mettre à jour l'activité de prospection",
         variant: "destructive"
       });
     }
@@ -171,6 +217,13 @@ const Prospection = () => {
 
   const handleSelectContact = (contact: Contact) => {
     setSelectedContact(contact);
+    setEditingProspection(null);
+    setIsAddModalOpen(true);
+  };
+
+  const handleEditProspection = (item: ProspectionItem) => {
+    setEditingProspection(item);
+    setSelectedContact(null);
     setIsAddModalOpen(true);
   };
 
@@ -196,6 +249,7 @@ const Prospection = () => {
           <Button 
             onClick={() => {
               setSelectedContact(null);
+              setEditingProspection(null);
               setIsAddModalOpen(true);
             }}
             className="flex items-center gap-2"
@@ -218,6 +272,7 @@ const Prospection = () => {
               <ProspectionHistory 
                 data={prospectionData} 
                 onDelete={handleDeleteProspection} 
+                onEdit={handleEditProspection}
               />
             </Card>
           </TabsContent>
@@ -238,6 +293,7 @@ const Prospection = () => {
         onOpenChange={setIsAddModalOpen}
         onAdd={handleAddProspection}
         selectedContact={selectedContact}
+        editingProspection={editingProspection}
       />
     </div>
   );

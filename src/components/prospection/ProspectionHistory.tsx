@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 interface ProspectionHistoryProps {
   data: ProspectionItem[];
   onDelete: (id: string) => void;
+  onEdit?: (item: ProspectionItem) => void;
 }
 
-export function ProspectionHistory({ data, onDelete }: ProspectionHistoryProps) {
+export function ProspectionHistory({ data, onDelete, onEdit }: ProspectionHistoryProps) {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -29,6 +30,7 @@ export function ProspectionHistory({ data, onDelete }: ProspectionHistoryProps) 
       <ProspectionTable 
         data={data}
         onDelete={onDelete}
+        onEdit={onEdit}
       />
     </div>
   );
