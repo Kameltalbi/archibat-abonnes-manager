@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { 
@@ -10,13 +10,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { BellIcon, UserIcon, SearchIcon, MenuIcon } from "lucide-react";
+import { BellIcon, UserIcon, MenuIcon } from "lucide-react";
 
 interface AppHeaderProps {
   onMenuClick: () => void;
 }
 
 export function AppHeader({ onMenuClick }: AppHeaderProps) {
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDateTime = (date: Date) => {
+    return date.toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   return (
     <header className="sticky top-0 z-30 w-full border-b bg-background">
       <div className="flex h-16 items-center px-6">
@@ -29,20 +50,14 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           <MenuIcon className="h-5 w-5" />
         </Button>
         
-        <div className="mr-4">
+        <div className="flex items-center space-x-4">
           <span className="text-xl font-bold text-archibat-blue">Archibat</span>
+          <div className="text-sm text-muted-foreground">
+            {formatDateTime(currentDateTime)}
+          </div>
         </div>
         
         <div className="ml-auto flex items-center space-x-4">
-          <div className="relative">
-            <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <input
-              type="search"
-              placeholder="Rechercher..."
-              className="w-64 rounded-full bg-background border border-input px-8 py-2 text-sm outline-none focus:ring-2 focus:ring-archibat-blue focus:ring-opacity-50"
-            />
-          </div>
-          
           <Button variant="ghost" size="icon" className="archibat-icon-btn relative">
             <BellIcon className="h-5 w-5" />
             <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-archibat-pink"></span>
