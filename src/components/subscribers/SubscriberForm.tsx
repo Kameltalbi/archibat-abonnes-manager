@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useEmailSender } from '@/hooks/useEmailSender';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -46,6 +47,7 @@ interface SubscriberFormProps {
 export function SubscriberForm({ onClose, isInternational = false, isInstitution = false }: SubscriberFormProps) {
   const [loading, setLoading] = useState(false);
   const [subscriptionTypes, setSubscriptionTypes] = useState<{id: string, nom: string, duree: number, prix: number}[]>([]);
+  const { sendWelcomeEmail } = useEmailSender();
 
   // Set up form with default values
   const form = useForm<SubscriberFormValues>({
@@ -225,9 +227,27 @@ export function SubscriberForm({ onClose, isInternational = false, isInstitution
 
         console.log('Abonné enregistré avec succès:', data);
         
+        // Get subscription type name for email
+        const selectedType = subscriptionTypes.find(type => type.id === values.typeAbonnement);
+        
+        // Send welcome email
+        try {
+          await sendWelcomeEmail({
+            nom: values.nom,
+            prenom: values.prenom,
+            email: values.email,
+            typeAbonnement: selectedType?.nom || 'Abonnement standard',
+            dateDebut: values.dateDebut,
+            dateFin: format(endDate, 'yyyy-MM-dd'),
+          });
+        } catch (emailError) {
+          console.error('Erreur lors de l\'envoi de l\'email:', emailError);
+          // Ne pas bloquer l'inscription si l'email échoue
+        }
+        
         toast({
           title: "Succès",
-          description: "Abonné ajouté avec succès",
+          description: "Abonné ajouté avec succès et email de confirmation envoyé",
         });
       }
 
