@@ -10,10 +10,10 @@ interface SessionData {
   logout_time: string | null;
   status: string;
   device: string;
-  profiles: {
+  profiles?: {
     full_name: string;
     email: string;
-  };
+  } | null;
 }
 
 interface InactivityData {
@@ -37,13 +37,7 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
     queryFn: async () => {
       let query = supabase
         .from('user_sessions')
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            email
-          )
-        `)
+        .select('*')
         .order('login_time', { ascending: false });
 
       if (dateFrom) {
@@ -53,9 +47,27 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
         query = query.lte('login_time', dateTo);
       }
 
-      const { data, error } = await query;
+      const { data: sessionsData, error } = await query;
       if (error) throw error;
-      return data as SessionData[];
+
+      // Récupérer les profiles séparément
+      if (sessionsData && sessionsData.length > 0) {
+        const userIds = [...new Set(sessionsData.map(s => s.user_id))];
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', userIds);
+
+        // Joindre les données
+        const sessionsWithProfiles = sessionsData.map(session => ({
+          ...session,
+          profiles: profilesData?.find(p => p.id === session.user_id) || null
+        }));
+
+        return sessionsWithProfiles as SessionData[];
+      }
+
+      return sessionsData as SessionData[];
     },
   });
 
