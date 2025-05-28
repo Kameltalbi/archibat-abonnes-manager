@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -13,10 +14,28 @@ const Index = () => {
       
       {/* Hero Section */}
       <section className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-gray-100 text-archibat-dark">
-        <div className="container mx-auto text-center px-4">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">Bienvenue sur votre espace pro Archibat</h1>
-          <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto text-gray-700">Gérez vos abonnements, vos contenus et vos services digitaux</p>
-          <LoginDialog className="text-lg px-8 py-6 h-auto bg-archibat-blue hover:bg-archibat-blue/80" />
+        <div className="container mx-auto px-4">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Contenu texte à gauche */}
+            <div className="text-center md:text-left">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">Bienvenue sur votre espace pro Archibat</h1>
+              <p className="text-xl md:text-2xl mb-10 text-gray-700">Gérez vos abonnements, vos contenus et vos services digitaux</p>
+              <LoginDialog className="text-lg px-8 py-6 h-auto bg-archibat-blue hover:bg-archibat-blue/80" />
+            </div>
+            
+            {/* Image à droite */}
+            <div className="relative">
+              <div className="absolute -top-6 -left-6 w-24 h-24 bg-archibat-blue/20 rounded-full"></div>
+              <div className="relative z-10 p-4 bg-white shadow-2xl rounded-lg">
+                <img 
+                  src="/lovable-uploads/50201e24-7483-4f60-9b57-1fc0aa7369a6.png" 
+                  alt="Dashboard Archibat - Interface de gestion" 
+                  className="w-full h-auto rounded"
+                />
+              </div>
+              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-archibat-violet/20 rounded-full"></div>
+            </div>
+          </div>
         </div>
       </section>
 
