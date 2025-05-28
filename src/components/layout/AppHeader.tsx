@@ -50,14 +50,17 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
           <MenuIcon className="h-5 w-5" />
         </Button>
         
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center">
           <span className="text-xl font-bold text-archibat-blue">Archibat</span>
+        </div>
+        
+        <div className="flex-1 flex justify-center">
           <div className="text-sm text-muted-foreground">
             {formatDateTime(currentDateTime)}
           </div>
         </div>
         
-        <div className="ml-auto flex items-center space-x-4">
+        <div className="flex items-center space-x-4">
           <Button variant="ghost" size="icon" className="archibat-icon-btn relative">
             <BellIcon className="h-5 w-5" />
             <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-archibat-pink"></span>
