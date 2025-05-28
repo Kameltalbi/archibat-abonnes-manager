@@ -30,6 +30,7 @@ export const ActivityProvider: React.FC<ActivityProviderProps> = ({ children }) 
     isActive,
     sessionId,
     inactivityWarning,
+    inactivityLevel,
     startSession,
     endSession,
     dismissWarning,
@@ -66,7 +67,12 @@ export const ActivityProvider: React.FC<ActivityProviderProps> = ({ children }) 
   return (
     <ActivityContext.Provider value={{ isActive, sessionId, startSession, endSession }}>
       {children}
-      {inactivityWarning && <InactivityWarning onDismiss={dismissWarning} />}
+      {inactivityWarning && inactivityLevel !== 'none' && (
+        <InactivityWarning 
+          onDismiss={dismissWarning} 
+          inactivityLevel={inactivityLevel}
+        />
+      )}
     </ActivityContext.Provider>
   );
 };

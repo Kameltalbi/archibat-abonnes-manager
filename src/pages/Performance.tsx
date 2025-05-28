@@ -7,13 +7,14 @@ import { Label } from '@/components/ui/label';
 import { usePerformanceData } from '@/hooks/usePerformanceData';
 import { PerformanceStats } from '@/components/performance/PerformanceStats';
 import { PerformanceChart } from '@/components/performance/PerformanceChart';
+import { DailyActivityReport } from '@/components/performance/DailyActivityReport';
 import { Calendar, Download, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 
 const Performance = () => {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [chartType, setChartType] = useState<'bar' | 'pie'>('bar');
+  const [selectedDailyDate, setSelectedDailyDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   const { stats, sessionsByUser, sessions, isLoading } = usePerformanceData(dateFrom, dateTo);
 
@@ -59,12 +60,30 @@ const Performance = () => {
         </p>
       </div>
 
+      {/* Rapport quotidien */}
+      <div className="space-y-4">
+        <div className="flex items-center space-x-4">
+          <Label htmlFor="dailyDate">Rapport d'activité quotidien :</Label>
+          <Input
+            id="dailyDate"
+            type="date"
+            value={selectedDailyDate}
+            onChange={(e) => setSelectedDailyDate(e.target.value)}
+            className="w-auto"
+          />
+        </div>
+        <DailyActivityReport 
+          sessionsByUser={sessionsByUser} 
+          selectedDate={selectedDailyDate}
+        />
+      </div>
+
       {/* Filtres */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Filter className="h-5 w-5" />
-            <span>Filtres</span>
+            <span>Filtres période</span>
           </CardTitle>
         </CardHeader>
         <CardContent>

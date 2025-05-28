@@ -9,6 +9,7 @@ interface ActivityTrackerState {
   lastActivity: Date;
   inactivityWarning: boolean;
   currentInactivityId: string | null;
+  inactivityLevel: 'none' | 'warning' | 'reminder1' | 'reminder2';
 }
 
 export const useActivityTracker = () => {
@@ -18,36 +19,58 @@ export const useActivityTracker = () => {
     lastActivity: new Date(),
     inactivityWarning: false,
     currentInactivityId: null,
+    inactivityLevel: 'none',
   });
 
   const inactivityTimer = useRef<NodeJS.Timeout>();
-  const warningTimer = useRef<NodeJS.Timeout>();
+  const reminderTimer1 = useRef<NodeJS.Timeout>();
+  const reminderTimer2 = useRef<NodeJS.Timeout>();
   const isTrackingRef = useRef(false);
 
+  const clearAllTimers = useCallback(() => {
+    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    if (reminderTimer1.current) clearTimeout(reminderTimer1.current);
+    if (reminderTimer2.current) clearTimeout(reminderTimer2.current);
+  }, []);
+
   const resetInactivityTimer = useCallback(() => {
-    if (inactivityTimer.current) {
-      clearTimeout(inactivityTimer.current);
-    }
-    if (warningTimer.current) {
-      clearTimeout(warningTimer.current);
-    }
+    clearAllTimers();
 
     setState(prev => ({ 
       ...prev, 
       lastActivity: new Date(), 
       isActive: true,
-      inactivityWarning: false 
+      inactivityWarning: false,
+      inactivityLevel: 'none'
     }));
 
-    // Timer pour 5 minutes d'inactivité
+    // Premier rappel après 5 minutes
     inactivityTimer.current = setTimeout(() => {
-      setState(prev => ({ ...prev, inactivityWarning: true }));
-      
-      // Timer pour 1 minute supplémentaire avant de marquer comme inactif
-      warningTimer.current = setTimeout(() => {
-        markAsInactive();
-      }, 60000); // 1 minute
+      setState(prev => ({ 
+        ...prev, 
+        inactivityWarning: true,
+        inactivityLevel: 'warning'
+      }));
     }, 300000); // 5 minutes
+
+    // Deuxième rappel après 30 minutes
+    reminderTimer1.current = setTimeout(() => {
+      setState(prev => ({ 
+        ...prev, 
+        inactivityWarning: true,
+        inactivityLevel: 'reminder1'
+      }));
+    }, 1800000); // 30 minutes
+
+    // Troisième rappel après 1 heure
+    reminderTimer2.current = setTimeout(() => {
+      setState(prev => ({ 
+        ...prev, 
+        inactivityWarning: true,
+        inactivityLevel: 'reminder2'
+      }));
+      markAsInactive();
+    }, 3600000); // 1 heure
   }, []);
 
   const markAsInactive = useCallback(async () => {
@@ -69,7 +92,6 @@ export const useActivityTracker = () => {
       setState(prev => ({ 
         ...prev, 
         isActive: false, 
-        inactivityWarning: false,
         currentInactivityId: data.id 
       }));
 
@@ -103,7 +125,6 @@ export const useActivityTracker = () => {
     setState(prev => ({ 
       ...prev, 
       isActive: true, 
-      inactivityWarning: false,
       currentInactivityId: null 
     }));
     resetInactivityTimer();
@@ -118,7 +139,7 @@ export const useActivityTracker = () => {
         .from('user_sessions')
         .insert({
           user_id: user.data.user.id,
-          ip_address: 'unknown', // Vous pouvez intégrer un service pour obtenir l'IP
+          ip_address: 'unknown',
           device: navigator.platform,
           user_agent: navigator.userAgent,
         })
@@ -154,15 +175,13 @@ export const useActivityTracker = () => {
         })
         .eq('id', state.sessionId);
 
-      if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
-      if (warningTimer.current) clearTimeout(warningTimer.current);
-
+      clearAllTimers();
       isTrackingRef.current = false;
       console.log('Session terminée');
     } catch (error) {
       console.error('Erreur lors de la fin de session:', error);
     }
-  }, [state.sessionId]);
+  }, [state.sessionId, clearAllTimers]);
 
   const dismissWarning = useCallback(() => {
     setState(prev => ({ ...prev, inactivityWarning: false }));
