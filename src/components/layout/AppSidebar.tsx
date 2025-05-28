@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -30,12 +29,15 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface AppSidebarProps {
   isOpen: boolean;
 }
 
 export function AppSidebar({ isOpen }: AppSidebarProps) {
+  const { isAdmin } = useUserRole();
+
   const menuItems = [
     { title: "Dashboard", icon: ChartBarIcon, url: "/" },
     { title: "Abonnés locaux", icon: UserIcon, url: "/abonnes-locaux" },
@@ -46,7 +48,7 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
     { title: "Type d'abonnement", icon: FileTextIcon, url: "/types-abonnement" },
     { title: "Calendrier", icon: CalendarIcon, url: "/calendrier" },
     { title: "Programme de travail", icon: ListIcon, url: "/programme" },
-    { title: "Performance", icon: TrendingUpIcon, url: "/performance" },
+    ...(isAdmin ? [{ title: "Performance", icon: TrendingUpIcon, url: "/performance" }] : []),
     { title: "Paramètres", icon: SettingsIcon, url: "/parametres" }
   ];
 
