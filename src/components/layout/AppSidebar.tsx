@@ -88,13 +88,13 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
       )}>
         {isOpen ? (
           <div className="flex items-center">
-            <div className="h-8 w-8 rounded-md archibat-gradient flex items-center justify-center">
+            <div className="h-8 w-8 rounded-md flex items-center justify-center" style={{ backgroundColor: '#8f85e8' }}>
               <span className="font-bold text-white">A</span>
             </div>
-            <h1 className="text-xl font-bold ml-2 text-archibat-blue">Archibat</h1>
+            <h1 className="text-xl font-bold ml-2" style={{ color: '#8f85e8' }}>Archibat</h1>
           </div>
         ) : (
-          <div className="h-8 w-8 rounded-md archibat-gradient flex items-center justify-center">
+          <div className="h-8 w-8 rounded-md flex items-center justify-center" style={{ backgroundColor: '#8f85e8' }}>
             <span className="font-bold text-white">A</span>
           </div>
         )}
@@ -113,9 +113,30 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
                         "flex items-center py-2.5 px-3 rounded-md transition-colors",
                         isOpen ? "justify-start" : "justify-center",
                         isActive 
-                          ? "bg-sidebar-accent text-archibat-blue font-semibold" 
-                          : "text-[#1E293B] hover:bg-sidebar-accent hover:text-archibat-blue font-medium"
+                          ? "text-white font-semibold" 
+                          : "text-[#1E293B] hover:text-white font-medium"
                       )}
+                      style={({ isActive }) => ({
+                        backgroundColor: isActive ? '#8f85e8' : 'transparent',
+                        ...(isActive ? {} : {
+                          ':hover': {
+                            backgroundColor: '#8f85e8',
+                            color: 'white'
+                          }
+                        })
+                      })}
+                      onMouseEnter={(e) => {
+                        if (!e.currentTarget.classList.contains('active')) {
+                          e.currentTarget.style.backgroundColor = '#8f85e8';
+                          e.currentTarget.style.color = 'white';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!e.currentTarget.classList.contains('active')) {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = '#1E293B';
+                        }
+                      }}
                     >
                       <item.icon className={cn("h-5 w-5", isOpen ? "mr-3" : "")} />
                       {isOpen && <span className="text-base">{item.title}</span>}
@@ -131,10 +152,18 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
       <SidebarFooter className="mt-auto border-t border-border p-4">
         <button 
           className={cn(
-            "flex items-center w-full py-2.5 px-3 rounded-md transition-colors hover:bg-destructive/10 hover:text-destructive text-[#1E293B] font-medium",
+            "flex items-center w-full py-2.5 px-3 rounded-md transition-colors hover:text-white text-[#1E293B] font-medium",
             isOpen ? "justify-start" : "justify-center"
           )}
           onClick={handleLogout}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = '#dc2626';
+            e.currentTarget.style.color = 'white';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = '#1E293B';
+          }}
         >
           <LogOutIcon className={cn("h-5 w-5", isOpen ? "mr-3" : "")} />
           {isOpen && <span className="text-base">Se déconnecter</span>}

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -20,12 +19,12 @@ const Index = () => {
             <div className="text-center md:text-left">
               <h1 className="text-4xl md:text-6xl font-bold mb-6">Bienvenue sur votre espace pro Archibat</h1>
               <p className="text-xl md:text-2xl mb-10 text-gray-700">Gérez vos abonnements, vos contenus et vos services digitaux</p>
-              <LoginDialog className="text-lg px-8 py-6 h-auto bg-archibat-blue hover:bg-archibat-blue/80" />
+              <LoginDialog className="text-lg px-8 py-6 h-auto hover:opacity-90" style={{ backgroundColor: '#8f85e8', color: 'white' }} />
             </div>
             
             {/* Image à droite */}
             <div className="relative">
-              <div className="absolute -top-6 -left-6 w-24 h-24 bg-archibat-blue/20 rounded-full"></div>
+              <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full" style={{ backgroundColor: '#8f85e8', opacity: 0.2 }}></div>
               <div className="relative z-10 p-4 bg-white shadow-2xl rounded-lg">
                 <img 
                   src="/lovable-uploads/50201e24-7483-4f60-9b57-1fc0aa7369a6.png" 
@@ -33,7 +32,7 @@ const Index = () => {
                   className="w-full h-auto rounded"
                 />
               </div>
-              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-archibat-violet/20 rounded-full"></div>
+              <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full" style={{ backgroundColor: '#8f85e8', opacity: 0.2 }}></div>
             </div>
           </div>
         </div>
@@ -44,7 +43,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="relative">
-              <div className="absolute -top-6 -left-6 w-24 h-24 bg-archibat-blue/20 rounded-full"></div>
+              <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full" style={{ backgroundColor: '#8f85e8', opacity: 0.2 }}></div>
               <div className="relative z-10 p-4 bg-white shadow-lg rounded-lg">
                 <img 
                   src="/placeholder.svg" 
@@ -52,7 +51,7 @@ const Index = () => {
                   className="w-full h-auto rounded"
                 />
               </div>
-              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-archibat-violet/20 rounded-full"></div>
+              <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full" style={{ backgroundColor: '#8f85e8', opacity: 0.2 }}></div>
             </div>
             
             <div>
@@ -60,19 +59,19 @@ const Index = () => {
               <p className="text-lg mb-6">Archibat est la référence des professionnels de l'architecture et du bâtiment depuis 1997.</p>
               <ul className="space-y-3">
                 <li className="flex items-center">
-                  <CheckIcon className="h-5 w-5 text-archibat-blue mr-2" />
+                  <CheckIcon className="h-5 w-5 mr-2" style={{ color: '#8f85e8' }} />
                   <span>Édition papier distribuée dans toute l'Afrique</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckIcon className="h-5 w-5 text-archibat-blue mr-2" />
+                  <CheckIcon className="h-5 w-5 mr-2" style={{ color: '#8f85e8' }} />
                   <span>Version numérique enrichie</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckIcon className="h-5 w-5 text-archibat-blue mr-2" />
+                  <CheckIcon className="h-5 w-5 mr-2" style={{ color: '#8f85e8' }} />
                   <span>Plateforme professionnelle exclusive</span>
                 </li>
                 <li className="flex items-center">
-                  <CheckIcon className="h-5 w-5 text-archibat-blue mr-2" />
+                  <CheckIcon className="h-5 w-5 mr-2" style={{ color: '#8f85e8' }} />
                   <span>Événements et networking</span>
                 </li>
               </ul>
@@ -92,7 +91,7 @@ const Index = () => {
           <div className="grid md:grid-cols-3 gap-8">
             {/* Carte 1 */}
             <Card className="transition-all duration-300 hover:shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-archibat-blue to-archibat-violet text-white">
+              <CardHeader className="text-white" style={{ background: `linear-gradient(to right, #8f85e8, #8f85e8)` }}>
                 <CardTitle className="text-xl">Abonnement Standard</CardTitle>
                 <CardDescription className="text-white/80">Pour les professionnels</CardDescription>
               </CardHeader>
@@ -114,16 +113,16 @@ const Index = () => {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full">En savoir plus</Button>
+                <Button className="w-full" style={{ backgroundColor: '#8f85e8', color: 'white' }}>En savoir plus</Button>
               </CardFooter>
             </Card>
             
             {/* Carte 2 - Featured */}
-            <Card className="transition-all duration-300 hover:shadow-xl relative border-archibat-pink">
-              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-archibat-pink text-white px-4 py-1 rounded-full text-sm font-medium">
+            <Card className="transition-all duration-300 hover:shadow-xl relative" style={{ borderColor: '#8f85e8' }}>
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white px-4 py-1 rounded-full text-sm font-medium" style={{ backgroundColor: '#8f85e8' }}>
                 Populaire
               </div>
-              <CardHeader className="bg-gradient-to-r from-archibat-violet to-archibat-pink text-white">
+              <CardHeader className="text-white" style={{ background: `linear-gradient(to right, #8f85e8, #8f85e8)` }}>
                 <CardTitle className="text-xl">Abonnement Pro</CardTitle>
                 <CardDescription className="text-white/80">Pour les cabinets et entreprises</CardDescription>
               </CardHeader>
@@ -149,13 +148,13 @@ const Index = () => {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full bg-archibat-pink hover:bg-archibat-pink/80">S'abonner</Button>
+                <Button className="w-full" style={{ backgroundColor: '#8f85e8', color: 'white' }}>S'abonner</Button>
               </CardFooter>
             </Card>
             
             {/* Carte 3 */}
             <Card className="transition-all duration-300 hover:shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-archibat-pink to-archibat-blue/70 text-white">
+              <CardHeader className="text-white" style={{ background: `linear-gradient(to right, #8f85e8, #8f85e8)` }}>
                 <CardTitle className="text-xl">Pack Digital</CardTitle>
                 <CardDescription className="text-white/80">Accès 100% numérique</CardDescription>
               </CardHeader>
@@ -177,7 +176,7 @@ const Index = () => {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full">En savoir plus</Button>
+                <Button className="w-full" style={{ backgroundColor: '#8f85e8', color: 'white' }}>En savoir plus</Button>
               </CardFooter>
             </Card>
           </div>
@@ -194,49 +193,49 @@ const Index = () => {
           
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
-              <div className="mb-4 mx-auto bg-archibat-blue/10 w-16 h-16 flex items-center justify-center rounded-full">
-                <DownloadIcon className="h-8 w-8 text-archibat-blue" />
+              <div className="mb-4 mx-auto w-16 h-16 flex items-center justify-center rounded-full" style={{ backgroundColor: '#8f85e8', opacity: 0.1 }}>
+                <DownloadIcon className="h-8 w-8" style={{ color: '#8f85e8' }} />
               </div>
               <h3 className="text-xl font-semibold mb-2">Télécharger les revues</h3>
               <p className="text-gray-600">Accédez à toutes nos publications en version numérique, optimisée pour tous vos appareils.</p>
             </div>
             
             <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
-              <div className="mb-4 mx-auto bg-archibat-violet/10 w-16 h-16 flex items-center justify-center rounded-full">
-                <FileTextIcon className="h-8 w-8 text-archibat-violet" />
+              <div className="mb-4 mx-auto w-16 h-16 flex items-center justify-center rounded-full" style={{ backgroundColor: '#8f85e8', opacity: 0.1 }}>
+                <FileTextIcon className="h-8 w-8" style={{ color: '#8f85e8' }} />
               </div>
               <h3 className="text-xl font-semibold mb-2">Accéder aux factures</h3>
               <p className="text-gray-600">Retrouvez et téléchargez facilement l'historique de vos factures et paiements.</p>
             </div>
             
             <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
-              <div className="mb-4 mx-auto bg-archibat-pink/10 w-16 h-16 flex items-center justify-center rounded-full">
-                <UserIcon className="h-8 w-8 text-archibat-pink" />
+              <div className="mb-4 mx-auto w-16 h-16 flex items-center justify-center rounded-full" style={{ backgroundColor: '#8f85e8', opacity: 0.1 }}>
+                <UserIcon className="h-8 w-8" style={{ color: '#8f85e8' }} />
               </div>
               <h3 className="text-xl font-semibold mb-2">Modifier vos informations</h3>
               <p className="text-gray-600">Mettez à jour vos coordonnées et préférences de communication en toute simplicité.</p>
             </div>
             
             <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
-              <div className="mb-4 mx-auto bg-archibat-blue/10 w-16 h-16 flex items-center justify-center rounded-full">
-                <SettingsIcon className="h-8 w-8 text-archibat-blue" />
+              <div className="mb-4 mx-auto w-16 h-16 flex items-center justify-center rounded-full" style={{ backgroundColor: '#8f85e8', opacity: 0.1 }}>
+                <SettingsIcon className="h-8 w-8" style={{ color: '#8f85e8' }} />
               </div>
               <h3 className="text-xl font-semibold mb-2">Gérer vos services</h3>
               <p className="text-gray-600">Configurez et personnalisez vos services publicitaires et abonnements.</p>
             </div>
             
             <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
-              <div className="mb-4 mx-auto bg-archibat-violet/10 w-16 h-16 flex items-center justify-center rounded-full">
-                <MailIcon className="h-8 w-8 text-archibat-violet" />
+              <div className="mb-4 mx-auto w-16 h-16 flex items-center justify-center rounded-full" style={{ backgroundColor: '#8f85e8', opacity: 0.1 }}>
+                <MailIcon className="h-8 w-8" style={{ color: '#8f85e8' }} />
               </div>
               <h3 className="text-xl font-semibold mb-2">Contacter le support</h3>
               <p className="text-gray-600">Notre équipe est à votre disposition pour répondre à toutes vos questions.</p>
             </div>
             
             <div className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-archibat-blue to-archibat-pink opacity-0 group-hover:opacity-10 transition-opacity"></div>
-              <div className="mb-4 mx-auto bg-archibat-pink/10 w-16 h-16 flex items-center justify-center rounded-full">
-                <FileTextIcon className="h-8 w-8 text-archibat-pink" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity" style={{ background: `linear-gradient(to right, #8f85e8, #8f85e8)` }}></div>
+              <div className="mb-4 mx-auto w-16 h-16 flex items-center justify-center rounded-full" style={{ backgroundColor: '#8f85e8', opacity: 0.1 }}>
+                <FileTextIcon className="h-8 w-8" style={{ color: '#8f85e8' }} />
               </div>
               <h3 className="text-xl font-semibold mb-2">Contenus exclusifs</h3>
               <p className="text-gray-600">Découvrez nos articles, interviews et analyses réservés aux abonnés.</p>
@@ -246,7 +245,7 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-archibat-blue text-white py-12">
+      <footer className="text-white py-12" style={{ backgroundColor: '#8f85e8' }}>
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
             <div className="mb-6 md:mb-0">

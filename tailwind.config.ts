@@ -26,7 +26,7 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
+					DEFAULT: '#8f85e8',
 					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
@@ -56,7 +56,7 @@ export default {
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
-					primary: 'hsl(var(--sidebar-primary))',
+					primary: '#8f85e8',
 					'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
 					accent: 'hsl(var(--sidebar-accent))',
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
@@ -65,9 +65,9 @@ export default {
 				},
 				// Archibat custom colors
 				archibat: {
-					blue: '#0057FF',  
-					violet: '#7F00FF', 
-					pink: '#FF4E8E',   
+					blue: '#8f85e8',  
+					violet: '#8f85e8', 
+					pink: '#8f85e8',   
 					dark: '#333333',   
 					light: '#FFFFFF'   
 				}
