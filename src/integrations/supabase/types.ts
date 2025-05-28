@@ -483,6 +483,113 @@ export type Database = {
         }
         Relationships: []
       }
+      tracking_settings: {
+        Row: {
+          created_at: string
+          email_notifications_enabled: boolean
+          id: string
+          inactivity_threshold_minutes: number
+          notification_threshold_minutes: number
+          updated_at: string
+          warning_duration_minutes: number
+        }
+        Insert: {
+          created_at?: string
+          email_notifications_enabled?: boolean
+          id?: string
+          inactivity_threshold_minutes?: number
+          notification_threshold_minutes?: number
+          updated_at?: string
+          warning_duration_minutes?: number
+        }
+        Update: {
+          created_at?: string
+          email_notifications_enabled?: boolean
+          id?: string
+          inactivity_threshold_minutes?: number
+          notification_threshold_minutes?: number
+          updated_at?: string
+          warning_duration_minutes?: number
+        }
+        Relationships: []
+      }
+      user_inactivity: {
+        Row: {
+          created_at: string
+          duration_minutes: number | null
+          end_idle: string | null
+          id: string
+          session_id: string
+          start_idle: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number | null
+          end_idle?: string | null
+          id?: string
+          session_id: string
+          start_idle: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number | null
+          end_idle?: string | null
+          id?: string
+          session_id?: string
+          start_idle?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_inactivity_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "user_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_sessions: {
+        Row: {
+          created_at: string
+          device: string | null
+          id: string
+          ip_address: string | null
+          login_time: string
+          logout_time: string | null
+          status: string
+          updated_at: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device?: string | null
+          id?: string
+          ip_address?: string | null
+          login_time?: string
+          logout_time?: string | null
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device?: string | null
+          id?: string
+          ip_address?: string | null
+          login_time?: string
+          logout_time?: string | null
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       ventes: {
         Row: {
           client: string
@@ -575,6 +682,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_active_time: {
+        Args: { p_session_id: string }
+        Returns: number
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: string
