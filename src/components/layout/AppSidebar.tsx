@@ -25,7 +25,8 @@ import {
   ChartBarIcon,
   SettingsIcon,
   LogOutIcon,
-  PhoneCallIcon
+  PhoneCallIcon,
+  TrendingUpIcon
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -45,6 +46,7 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
     { title: "Type d'abonnement", icon: FileTextIcon, url: "/types-abonnement" },
     { title: "Calendrier", icon: CalendarIcon, url: "/calendrier" },
     { title: "Programme de travail", icon: ListIcon, url: "/programme" },
+    { title: "Performance", icon: TrendingUpIcon, url: "/performance" },
     { title: "Paramètres", icon: SettingsIcon, url: "/parametres" }
   ];
 
