@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -19,7 +20,7 @@ const Index = () => {
             <div className="text-center md:text-left">
               <h1 className="text-4xl md:text-6xl font-bold mb-6">Bienvenue sur votre espace pro Archibat</h1>
               <p className="text-xl md:text-2xl mb-10 text-gray-700">Gérez vos abonnements, vos contenus et vos services digitaux</p>
-              <LoginDialog className="text-lg px-8 py-6 h-auto hover:opacity-90" style={{ backgroundColor: '#8f85e8', color: 'white' }} />
+              <LoginDialog className="text-lg px-8 py-6 h-auto text-white hover:opacity-90" style={{ backgroundColor: '#8f85e8' }} />
             </div>
             
             {/* Image à droite */}
