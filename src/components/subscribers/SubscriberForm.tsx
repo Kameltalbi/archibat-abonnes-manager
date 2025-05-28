@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -68,7 +67,6 @@ export function SubscriberForm({ onClose, isInternational = false, isInstitution
     },
   });
 
-  // Fetch subscription types on component mount
   useEffect(() => {
     async function fetchSubscriptionTypes() {
       try {
@@ -120,7 +118,6 @@ export function SubscriberForm({ onClose, isInternational = false, isInstitution
     try {
       setLoading(true);
       
-      // Get the session to check if user is authenticated
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
@@ -149,7 +146,6 @@ export function SubscriberForm({ onClose, isInternational = false, isInstitution
       const endDate = addMonths(startDate, values.duree);
       
       if (isInstitution) {
-        // Enregistrer une institution
         const institutionData = {
           nom: values.nom,
           type: values.type || 'Autre',
@@ -186,14 +182,13 @@ export function SubscriberForm({ onClose, isInternational = false, isInstitution
           description: "Institution ajoutée avec succès",
         });
       } else {
-        // Enregistrer un abonné (local ou international)
-        
-        // Prepare data for Supabase insert
+        // Prepare data for Supabase insert - now including address
         const subscriberData = {
           nom: values.nom,
           prenom: values.prenom || '',
           email: values.email,
           telephone: values.telephone || null,
+          adresse: values.adresse || null,
           type_abonnement_id: values.typeAbonnement,
           date_debut: values.dateDebut,
           date_fin: format(endDate, 'yyyy-MM-dd'),
@@ -236,11 +231,9 @@ export function SubscriberForm({ onClose, isInternational = false, isInstitution
         });
       }
 
-      // Close the form/modal if onClose prop is provided
       if (onClose) {
         onClose();
       } else {
-        // Reset form if no onClose provided
         form.reset();
       }
     } catch (error) {
@@ -347,6 +340,20 @@ export function SubscriberForm({ onClose, isInternational = false, isInstitution
                 )}
               />
               
+              <FormField
+                control={form.control}
+                name="adresse"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Adresse</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Adresse complète" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
               {isInternational && (
                 <FormField
                   control={form.control}
@@ -356,22 +363,6 @@ export function SubscriberForm({ onClose, isInternational = false, isInstitution
                       <FormLabel>Pays</FormLabel>
                       <FormControl>
                         <Input placeholder="Pays" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-              
-              {isInstitution && (
-                <FormField
-                  control={form.control}
-                  name="adresse"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Adresse</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Adresse complète" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
