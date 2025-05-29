@@ -51,13 +51,33 @@ const TRACKED_USER_EMAIL = 'aymen.boubakri@gmail.com';
 
 export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
   const { data: sessions, isLoading: sessionsLoading } = useQuery({
-    queryKey: ['user-sessions', dateFrom, dateTo],
+    queryKey: ['user-sessions', dateFrom, dateTo, TRACKED_USER_EMAIL],
     queryFn: async () => {
-      console.log('🔍 Fetching sessions with filters:', { dateFrom, dateTo });
+      console.log('🔍 Fetching sessions with filters:', { dateFrom, dateTo, trackedUser: TRACKED_USER_EMAIL });
       
+      // D'abord, récupérer le profil de l'utilisateur Aymen pour obtenir son user_id
+      const { data: aymenProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .eq('email', TRACKED_USER_EMAIL)
+        .single();
+
+      console.log('👤 Aymen profile:', aymenProfile);
+      if (profileError) {
+        console.error('❌ Error fetching Aymen profile:', profileError);
+        return [];
+      }
+
+      if (!aymenProfile) {
+        console.log('❌ Aymen profile not found');
+        return [];
+      }
+
+      // Maintenant récupérer les sessions uniquement pour Aymen
       let query = supabase
         .from('user_sessions')
         .select('*')
+        .eq('user_id', aymenProfile.id)
         .order('login_time', { ascending: false });
 
       if (dateFrom) {
@@ -68,37 +88,21 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
       }
 
       const { data: sessionsData, error } = await query;
-      if (error) throw error;
-
-      console.log('📊 Raw sessions data:', sessionsData);
-
-      // Récupérer les profiles séparément
-      if (sessionsData && sessionsData.length > 0) {
-        const userIds = [...new Set(sessionsData.map(s => s.user_id))];
-        console.log('👥 User IDs found:', userIds);
-        
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, full_name, email')
-          .in('id', userIds);
-
-        console.log('👤 Profiles data:', profilesData);
-        if (profilesError) console.error('❌ Profiles error:', profilesError);
-
-        // Joindre les données et filtrer uniquement l'utilisateur Aymen
-        const sessionsWithProfiles = sessionsData.map(session => ({
-          ...session,
-          profiles: profilesData?.find(p => p.id === session.user_id) || null
-        })).filter(session => {
-          // Filtrer uniquement Aymen Boubakri
-          return session.profiles?.email === TRACKED_USER_EMAIL;
-        });
-
-        console.log('🔗 Sessions with profiles (filtered for Aymen):', sessionsWithProfiles);
-        return sessionsWithProfiles as SessionData[];
+      if (error) {
+        console.error('❌ Sessions error:', error);
+        throw error;
       }
 
-      return [] as SessionData[];
+      console.log('📊 Raw sessions data for Aymen:', sessionsData);
+
+      // Joindre les données du profil
+      const sessionsWithProfiles = (sessionsData || []).map(session => ({
+        ...session,
+        profiles: aymenProfile
+      }));
+
+      console.log('🔗 Final sessions with Aymen profile:', sessionsWithProfiles);
+      return sessionsWithProfiles as SessionData[];
     },
   });
 
@@ -251,7 +255,7 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
   const getSessionsByUser = () => {
     if (!sessions || !inactivityData) return [];
 
-    console.log('👥 Processing sessions by user...');
+    console.log('👥 Processing sessions by user for Aymen only...');
     const userMap = new Map();
 
     sessions.forEach(session => {
