@@ -95,9 +95,9 @@ export const useActivityTracker = () => {
         currentInactivityId: data.id 
       }));
 
-      console.log('Période d\'inactivité démarrée');
+      console.log('⏸️ Période d\'inactivité démarrée');
     } catch (error) {
-      console.error('Erreur lors du marquage d\'inactivité:', error);
+      console.error('❌ Erreur lors du marquage d\'inactivité:', error);
     }
   }, [state.sessionId]);
 
@@ -116,9 +116,9 @@ export const useActivityTracker = () => {
           })
           .eq('id', state.currentInactivityId);
 
-        console.log(`Période d'inactivité terminée: ${durationMinutes} minutes`);
+        console.log(`▶️ Période d'inactivité terminée: ${durationMinutes} minutes`);
       } catch (error) {
-        console.error('Erreur lors de la fin d\'inactivité:', error);
+        console.error('❌ Erreur lors de la fin d\'inactivité:', error);
       }
     }
 
@@ -131,30 +131,50 @@ export const useActivityTracker = () => {
   }, [state.currentInactivityId, state.lastActivity, resetInactivityTimer]);
 
   const startSession = useCallback(async () => {
+    console.log('🚀 Attempting to start session...');
+    
     try {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) return;
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        console.error('❌ Error getting user:', userError);
+        return;
+      }
+      
+      if (!user) {
+        console.log('❌ No user found, cannot start session');
+        return;
+      }
+
+      console.log('👤 Starting session for user:', user.email);
 
       const { data, error } = await supabase
         .from('user_sessions')
         .insert({
-          user_id: user.data.user.id,
+          user_id: user.id,
           ip_address: 'unknown',
-          device: navigator.platform,
-          user_agent: navigator.userAgent,
+          device: navigator.platform || 'unknown',
+          user_agent: navigator.userAgent || 'unknown',
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error creating session:', error);
+        throw error;
+      }
 
+      console.log('✅ Session created successfully:', data.id);
       setState(prev => ({ ...prev, sessionId: data.id }));
       resetInactivityTimer();
       isTrackingRef.current = true;
 
-      console.log('Session démarrée:', data.id);
+      toast({
+        title: "Suivi d'activité démarré",
+        description: "Votre temps de travail est maintenant suivi.",
+      });
     } catch (error) {
-      console.error('Erreur lors du démarrage de session:', error);
+      console.error('❌ Erreur lors du démarrage de session:', error);
       toast({
         title: "Erreur de tracking",
         description: "Impossible de démarrer le suivi d'activité",
@@ -166,6 +186,8 @@ export const useActivityTracker = () => {
   const endSession = useCallback(async () => {
     if (!state.sessionId) return;
 
+    console.log('🔚 Ending session:', state.sessionId);
+    
     try {
       await supabase
         .from('user_sessions')
@@ -177,9 +199,10 @@ export const useActivityTracker = () => {
 
       clearAllTimers();
       isTrackingRef.current = false;
-      console.log('Session terminée');
+      setState(prev => ({ ...prev, sessionId: null }));
+      console.log('✅ Session terminée');
     } catch (error) {
-      console.error('Erreur lors de la fin de session:', error);
+      console.error('❌ Erreur lors de la fin de session:', error);
     }
   }, [state.sessionId, clearAllTimers]);
 

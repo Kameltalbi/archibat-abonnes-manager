@@ -37,21 +37,43 @@ export const ActivityProvider: React.FC<ActivityProviderProps> = ({ children }) 
   } = useActivityTracker();
 
   useEffect(() => {
-    // Démarrer automatiquement une session si l'utilisateur est connecté
-    const checkUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user && !sessionId) {
-        startSession();
+    console.log('🚀 ActivityProvider mounted, checking user...');
+    
+    // Fonction pour démarrer une session si l'utilisateur est connecté
+    const initializeSession = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        console.log('👤 Current user in ActivityProvider:', user?.email);
+        
+        if (error) {
+          console.error('❌ Error getting user:', error);
+          return;
+        }
+        
+        if (user && !sessionId) {
+          console.log('✅ User found, starting session...');
+          startSession();
+        }
+      } catch (error) {
+        console.error('❌ Error in initializeSession:', error);
       }
     };
 
-    checkUser();
+    // Démarrer une session immédiatement si l'utilisateur est déjà connecté
+    initializeSession();
 
     // Écouter les changements d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && !sessionId) {
-        startSession();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 Auth state changed:', event, session?.user?.email);
+      
+      if (event === 'SIGNED_IN' && session?.user && !sessionId) {
+        console.log('✅ User signed in, starting session...');
+        // Petit délai pour s'assurer que tout est initialisé
+        setTimeout(() => {
+          startSession();
+        }, 100);
       } else if (event === 'SIGNED_OUT' && sessionId) {
+        console.log('👋 User signed out, ending session...');
         endSession();
       }
     });
@@ -59,6 +81,7 @@ export const ActivityProvider: React.FC<ActivityProviderProps> = ({ children }) 
     return () => {
       subscription.unsubscribe();
       if (sessionId) {
+        console.log('🔚 Component unmounting, ending session...');
         endSession();
       }
     };
