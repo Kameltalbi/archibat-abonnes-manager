@@ -21,6 +21,14 @@ const Performance = () => {
 
   const { stats, sessionsByUser, sessions, inactivityData, isLoading } = usePerformanceData(dateFrom, dateTo);
 
+  // Debug logs
+  console.log('🎯 Performance page data:', {
+    sessions: sessions?.length || 0,
+    sessionsByUser: sessionsByUser?.length || 0,
+    inactivityData: inactivityData?.length || 0,
+    stats
+  });
+
   const exportToCSV = () => {
     if (!sessions) return;
 
@@ -64,6 +72,10 @@ const Performance = () => {
           <p className="text-muted-foreground">
             Suivi du temps de travail et de l'activité des collaborateurs (8h00-17h00)
           </p>
+          {/* Debug info */}
+          <div className="text-sm text-gray-500">
+            Debug: {sessions?.length || 0} sessions trouvées, {sessionsByUser?.length || 0} utilisateurs
+          </div>
         </div>
 
         {/* Statistiques des heures de travail */}

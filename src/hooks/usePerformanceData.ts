@@ -51,6 +51,8 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
   const { data: sessions, isLoading: sessionsLoading } = useQuery({
     queryKey: ['user-sessions', dateFrom, dateTo],
     queryFn: async () => {
+      console.log('🔍 Fetching sessions with filters:', { dateFrom, dateTo });
+      
       let query = supabase
         .from('user_sessions')
         .select('*')
@@ -66,13 +68,20 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
       const { data: sessionsData, error } = await query;
       if (error) throw error;
 
+      console.log('📊 Raw sessions data:', sessionsData);
+
       // Récupérer les profiles séparément
       if (sessionsData && sessionsData.length > 0) {
         const userIds = [...new Set(sessionsData.map(s => s.user_id))];
-        const { data: profilesData } = await supabase
+        console.log('👥 User IDs found:', userIds);
+        
+        const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
           .select('id, full_name, email')
           .in('id', userIds);
+
+        console.log('👤 Profiles data:', profilesData);
+        if (profilesError) console.error('❌ Profiles error:', profilesError);
 
         // Joindre les données
         const sessionsWithProfiles = sessionsData.map(session => ({
@@ -80,6 +89,7 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
           profiles: profilesData?.find(p => p.id === session.user_id) || null
         }));
 
+        console.log('🔗 Sessions with profiles:', sessionsWithProfiles);
         return sessionsWithProfiles as SessionData[];
       }
 
@@ -93,12 +103,15 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
       if (!sessions?.length) return [];
       
       const sessionIds = sessions.map(s => s.id);
+      console.log('⏰ Fetching inactivity for sessions:', sessionIds);
+      
       const { data, error } = await supabase
         .from('user_inactivity')
         .select('*')
         .in('session_id', sessionIds);
 
       if (error) throw error;
+      console.log('😴 Inactivity data:', data);
       return data as InactivityData[];
     },
     enabled: !!sessions?.length,
@@ -194,6 +207,8 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
       };
     }
 
+    console.log('📈 Calculating stats for sessions:', sessions.length);
+
     let totalActiveTime = 0;
     let totalInactiveTime = 0;
 
@@ -212,6 +227,13 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
 
     const workingHoursStats = calculateWorkingHours(sessions, inactivityData);
 
+    console.log('📊 Final stats:', {
+      totalActiveTime,
+      totalInactiveTime,
+      sessionsCount: sessions.length,
+      workingHoursStats
+    });
+
     return {
       totalActiveTime,
       totalInactiveTime,
@@ -224,11 +246,14 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
   const getSessionsByUser = () => {
     if (!sessions || !inactivityData) return [];
 
+    console.log('👥 Processing sessions by user...');
     const userMap = new Map();
 
     sessions.forEach(session => {
       const userId = session.user_id;
       const userName = session.profiles?.full_name || session.profiles?.email || 'Utilisateur inconnu';
+      
+      console.log('👤 Processing session for user:', { userId, userName, email: session.profiles?.email });
       
       if (!userMap.has(userId)) {
         userMap.set(userId, {
@@ -265,7 +290,9 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
       userData.totalInactiveTime += sessionInactivity;
     });
 
-    return Array.from(userMap.values());
+    const result = Array.from(userMap.values());
+    console.log('🔄 Sessions by user result:', result);
+    return result;
   };
 
   return {
