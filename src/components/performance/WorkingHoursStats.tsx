@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Clock, Calendar, CalendarDays, TrendingUp, DollarSign } from 'lucide-react';
+import { Clock, Calendar, CalendarDays, TrendingUp } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 interface WorkingHoursStatsProps {
@@ -27,12 +27,6 @@ export const WorkingHoursStats: React.FC<WorkingHoursStatsProps> = ({ workingHou
   const dailyProgress = (workingHours.dailyHours / workingHours.expectedDailyHours) * 100;
   const weeklyProgress = (workingHours.weeklyHours / expectedWeeklyHours) * 100;
   const monthlyProgress = (workingHours.monthlyHours / expectedMonthlyHours) * 100;
-
-  // Calcul du salaire estimé (exemple: 15€/heure)
-  const hourlyRate = 15;
-  const estimatedDailySalary = workingHours.dailyHours * hourlyRate;
-  const estimatedWeeklySalary = workingHours.weeklyHours * hourlyRate;
-  const estimatedMonthlySalary = workingHours.monthlyHours * hourlyRate;
 
   return (
     <div className="space-y-6">
@@ -97,38 +91,6 @@ export const WorkingHoursStats: React.FC<WorkingHoursStatsProps> = ({ workingHou
           </CardContent>
         </Card>
       </div>
-
-      {/* Calcul du salaire estimé */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <DollarSign className="h-5 w-5" />
-            <span>Estimation des salaires (basé sur 15€/heure)</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-lg font-semibold text-blue-600">
-                {estimatedDailySalary.toFixed(2)}€
-              </div>
-              <div className="text-sm text-muted-foreground">Salaire quotidien</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-semibold text-green-600">
-                {estimatedWeeklySalary.toFixed(2)}€
-              </div>
-              <div className="text-sm text-muted-foreground">Salaire hebdomadaire</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-semibold text-purple-600">
-                {estimatedMonthlySalary.toFixed(2)}€
-              </div>
-              <div className="text-sm text-muted-foreground">Salaire mensuel</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Informations sur les horaires de travail */}
       <Card>
