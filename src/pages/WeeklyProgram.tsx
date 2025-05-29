@@ -8,6 +8,7 @@ import { WeeklyGrid } from '@/components/weekly-program/WeeklyGrid';
 import { TaskModal } from '@/components/weekly-program/TaskModal';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { useUserRole } from '@/hooks/useUserRole';
 import { addDays, startOfWeek, endOfWeek, format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,6 +31,7 @@ const WeeklyProgram = () => {
   const [tasks, setTasks] = useState<WeeklyTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { isAdmin } = useUserRole();
   
   // Get week dates (Mon-Sun) based on selectedWeek
   const getWeekDays = (date: Date) => {
@@ -109,6 +111,15 @@ const WeeklyProgram = () => {
 
   // Handle deleting a task
   const handleDeleteTask = async (taskId: string) => {
+    if (!isAdmin) {
+      toast({
+        title: "Accès refusé",
+        description: "Seuls les administrateurs peuvent supprimer des tâches.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('weekly_tasks')
@@ -156,14 +167,16 @@ const WeeklyProgram = () => {
         description={`Du ${format(weekDays[0], 'dd MMMM', { locale: fr })} au ${format(weekDays[6], 'dd MMMM yyyy', { locale: fr })}`}
         icon={<CalendarDaysIcon className="h-6 w-6 text-archibat-blue" />}
       >
-        <Button 
-          variant="outline"
-          onClick={handleDuplicateWeek}
-          className="flex items-center gap-1 mr-2"
-        >
-          <Copy className="h-4 w-4" />
-          Dupliquer une semaine
-        </Button>
+        {isAdmin && (
+          <Button 
+            variant="outline"
+            onClick={handleDuplicateWeek}
+            className="flex items-center gap-1 mr-2"
+          >
+            <Copy className="h-4 w-4" />
+            Dupliquer une semaine
+          </Button>
+        )}
         <Button 
           onClick={() => handleAddTask(new Date().getDay() - 1)}
           className="flex items-center gap-1"

@@ -20,9 +20,11 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
+import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Lock } from 'lucide-react';
 import { WeeklyTask } from '@/pages/WeeklyProgram';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface TaskModalProps {
   open: boolean;
@@ -49,6 +51,11 @@ export const TaskModal = ({
   const [isLoading, setIsLoading] = useState(false);
   
   const { toast } = useToast();
+  const { isAdmin, isLoading: isRoleLoading } = useUserRole();
+
+  // Determine if this is an edit operation (task exists) or create operation
+  const isEditMode = !!task;
+  const canModify = isEditMode ? isAdmin : true; // Anyone can create, only admin can edit
 
   // Set initial values when modal opens
   useEffect(() => {
@@ -68,6 +75,15 @@ export const TaskModal = ({
   }, [open, task, selectedDayIndex]);
 
   const handleSave = async () => {
+    if (isEditMode && !isAdmin) {
+      toast({
+        title: "Accès refusé",
+        description: "Seuls les administrateurs peuvent modifier les tâches existantes.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!title.trim()) {
       toast({
         title: "Titre requis",
@@ -96,7 +112,7 @@ export const TaskModal = ({
       };
       
       if (task?.id) {
-        // Update existing task
+        // Update existing task - only admins can do this
         const { error } = await supabase
           .from('weekly_tasks')
           .update(taskData)
@@ -109,7 +125,7 @@ export const TaskModal = ({
           description: "La tâche a été modifiée avec succès.",
         });
       } else {
-        // Insert new task
+        // Insert new task - any authenticated user can do this
         const { error } = await supabase
           .from('weekly_tasks')
           .insert([taskData]);
@@ -123,8 +139,6 @@ export const TaskModal = ({
       }
       
       onOpenChange(false);
-      // Plutôt que de recharger la page, on utilise la prop onSave
-      // pour déclencher le rechargement des tâches
       onSave({
         title,
         dayIndex,
@@ -145,12 +159,39 @@ export const TaskModal = ({
     }
   };
 
+  if (isRoleLoading) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Chargement...</DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>{task ? 'Modifier la tâche' : 'Ajouter une tâche'}</DialogTitle>
+          <DialogTitle>
+            {task ? 'Détails de la tâche' : 'Ajouter une tâche'}
+            {isEditMode && !isAdmin && <Lock className="inline ml-2 h-4 w-4" />}
+          </DialogTitle>
         </DialogHeader>
+        
+        {isEditMode && !isAdmin && (
+          <Alert>
+            <Lock className="h-4 w-4" />
+            <AlertDescription>
+              Vous pouvez consulter les détails de cette tâche, mais seuls les administrateurs peuvent la modifier.
+            </AlertDescription>
+          </Alert>
+        )}
         
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
@@ -160,12 +201,17 @@ export const TaskModal = ({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Titre de la tâche"
+              disabled={!canModify}
             />
           </div>
           
           <div className="grid gap-2">
             <Label htmlFor="day">Jour</Label>
-            <Select value={dayIndex.toString()} onValueChange={(value) => setDayIndex(parseInt(value))}>
+            <Select 
+              value={dayIndex.toString()} 
+              onValueChange={(value) => setDayIndex(parseInt(value))}
+              disabled={!canModify}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner un jour" />
               </SelectTrigger>
@@ -187,6 +233,7 @@ export const TaskModal = ({
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
+                disabled={!canModify}
               />
             </div>
             
@@ -197,6 +244,7 @@ export const TaskModal = ({
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
+                disabled={!canModify}
               />
             </div>
           </div>
@@ -208,18 +256,21 @@ export const TaskModal = ({
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Lieu de la tâche"
+              disabled={!canModify}
             />
           </div>
         </div>
         
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
-            Annuler
+            {canModify ? 'Annuler' : 'Fermer'}
           </Button>
-          <Button onClick={handleSave} disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Enregistrer
-          </Button>
+          {canModify && (
+            <Button onClick={handleSave} disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isEditMode ? 'Modifier' : 'Ajouter'}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
