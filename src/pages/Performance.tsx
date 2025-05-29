@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,7 @@ import { usePerformanceData } from '@/hooks/usePerformanceData';
 import { PerformanceStats } from '@/components/performance/PerformanceStats';
 import { PerformanceChart } from '@/components/performance/PerformanceChart';
 import { DailyActivityReport } from '@/components/performance/DailyActivityReport';
+import { DetailedActivityTable } from '@/components/performance/DetailedActivityTable';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { Calendar, Download, Filter } from 'lucide-react';
 import { format } from 'date-fns';
@@ -16,7 +18,7 @@ const Performance = () => {
   const [dateTo, setDateTo] = useState('');
   const [selectedDailyDate, setSelectedDailyDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
-  const { stats, sessionsByUser, sessions, isLoading } = usePerformanceData(dateFrom, dateTo);
+  const { stats, sessionsByUser, sessions, inactivityData, isLoading } = usePerformanceData(dateFrom, dateTo);
 
   const exportToCSV = () => {
     if (!sessions) return;
@@ -138,6 +140,12 @@ const Performance = () => {
 
         {/* Statistiques globales */}
         <PerformanceStats stats={stats} />
+
+        {/* Activité détaillée des utilisateurs */}
+        <DetailedActivityTable 
+          sessions={sessions || []} 
+          inactivityData={inactivityData || []} 
+        />
 
         {/* Graphiques */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
