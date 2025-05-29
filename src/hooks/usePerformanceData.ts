@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
@@ -47,6 +46,9 @@ const WORK_END_HOUR = 17; // 17h00
 const LUNCH_BREAK_MINUTES = 60; // 1 heure de pause déjeuner
 const EXPECTED_DAILY_HOURS = 8; // 8 heures par jour (9h - 1h pause)
 
+// Email de l'utilisateur à tracker
+const TRACKED_USER_EMAIL = 'aymen.boubakri@gmail.com';
+
 export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
   const { data: sessions, isLoading: sessionsLoading } = useQuery({
     queryKey: ['user-sessions', dateFrom, dateTo],
@@ -83,17 +85,20 @@ export const usePerformanceData = (dateFrom?: string, dateTo?: string) => {
         console.log('👤 Profiles data:', profilesData);
         if (profilesError) console.error('❌ Profiles error:', profilesError);
 
-        // Joindre les données
+        // Joindre les données et filtrer uniquement l'utilisateur Aymen
         const sessionsWithProfiles = sessionsData.map(session => ({
           ...session,
           profiles: profilesData?.find(p => p.id === session.user_id) || null
-        }));
+        })).filter(session => {
+          // Filtrer uniquement Aymen Boubakri
+          return session.profiles?.email === TRACKED_USER_EMAIL;
+        });
 
-        console.log('🔗 Sessions with profiles:', sessionsWithProfiles);
+        console.log('🔗 Sessions with profiles (filtered for Aymen):', sessionsWithProfiles);
         return sessionsWithProfiles as SessionData[];
       }
 
-      return sessionsData as SessionData[];
+      return [] as SessionData[];
     },
   });
 
