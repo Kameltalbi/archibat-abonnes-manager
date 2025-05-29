@@ -9,6 +9,7 @@ import { PerformanceStats } from '@/components/performance/PerformanceStats';
 import { PerformanceChart } from '@/components/performance/PerformanceChart';
 import { DailyActivityReport } from '@/components/performance/DailyActivityReport';
 import { DetailedActivityTable } from '@/components/performance/DetailedActivityTable';
+import { WorkingHoursStats } from '@/components/performance/WorkingHoursStats';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { Calendar, Download, Filter } from 'lucide-react';
 import { format } from 'date-fns';
@@ -61,9 +62,12 @@ const Performance = () => {
         <div className="flex flex-col space-y-2">
           <h1 className="text-3xl font-bold">Performance & Activité</h1>
           <p className="text-muted-foreground">
-            Suivi du temps de travail et de l'activité des collaborateurs
+            Suivi du temps de travail et de l'activité des collaborateurs (8h00-17h00)
           </p>
         </div>
+
+        {/* Statistiques des heures de travail */}
+        <WorkingHoursStats workingHours={stats.workingHoursStats} />
 
         {/* Rapport quotidien */}
         <div className="space-y-4">
