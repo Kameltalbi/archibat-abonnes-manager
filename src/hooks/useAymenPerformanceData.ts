@@ -27,14 +27,16 @@ interface PerformanceData {
 }
 
 export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
-  // D'abord, on récupère l'ID d'Aymen
+  // D'abord, on récupère l'ID d'Aymen avec une requête plus précise
   const { data: aymenUserId } = useQuery({
     queryKey: ['aymen-user-id'],
     queryFn: async (): Promise<string | null> => {
+      console.log('Recherche de l\'utilisateur Aymen...');
+      
       const { data, error } = await supabase
         .from('profiles')
-        .select('id')
-        .or('full_name.ilike.%aymen%,email.ilike.%aymen%,full_name.ilike.%boubakri%,email.ilike.%boubakri%')
+        .select('id, full_name, email')
+        .or('full_name.ilike.%Aymen Boubakri%,email.ilike.%aymen.boubakri%')
         .maybeSingle();
 
       if (error) {
@@ -42,6 +44,7 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
         return null;
       }
 
+      console.log('Résultat de la recherche Aymen:', data);
       return data?.id || null;
     },
   });
@@ -50,7 +53,10 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
   return useQuery({
     queryKey: ['aymen-performance-data', aymenUserId, period, format(selectedDate, 'yyyy-MM-dd')],
     queryFn: async (): Promise<PerformanceData> => {
+      console.log('Récupération des données de performance pour Aymen, user_id:', aymenUserId);
+      
       if (!aymenUserId) {
+        console.log('Aucun user_id trouvé pour Aymen');
         return {
           dailyStats: [],
           totalActiveMinutes: 0,
@@ -82,6 +88,8 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
           endDate = new Date(selectedDate);
       }
 
+      console.log('Période de recherche:', format(startDate, 'yyyy-MM-dd'), 'à', format(endDate, 'yyyy-MM-dd'));
+
       const { data, error } = await supabase
         .from('daily_activity_summary')
         .select('*')
@@ -94,6 +102,8 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
         console.error('Erreur lors de la récupération des données de performance pour Aymen:', error);
         throw error;
       }
+
+      console.log('Données d\'activité trouvées pour Aymen:', data);
 
       const dailyStats = data || [];
       const totalActiveMinutes = dailyStats.reduce((sum, day) => sum + day.total_active_minutes, 0);
