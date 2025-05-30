@@ -47,6 +47,27 @@ const Performance = () => {
     );
   }
 
+  if (!performanceData?.aymenUserId) {
+    return (
+      <AdminRoute>
+        <div className="space-y-6">
+          <PageHeader 
+            title="Suivi de l'activité de Aymen" 
+            description="Surveillance du temps de travail et de la présence quotidienne"
+          />
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center text-muted-foreground">
+                <p className="mb-2">❌ Utilisateur Aymen Boubakri non trouvé dans la base de données</p>
+                <p className="text-sm">Vérifiez qu'un utilisateur avec le nom "Aymen" ou "Boubakri" existe dans les profils.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AdminRoute>
+    );
+  }
+
   return (
     <AdminRoute>
       <div className="space-y-6">
@@ -73,7 +94,7 @@ const Performance = () => {
                 {todayHours}h {todayMinutes}min
               </div>
               <p className="text-xs text-muted-foreground">
-                {todayData ? `${todaySessions} session${todaySessions > 1 ? 's' : ''}` : 'Aucune activité'}
+                {todayData ? `${todaySessions} session${todaySessions > 1 ? 's' : ''}` : 'Aucune activité détectée'}
               </p>
             </CardContent>
           </Card>
@@ -123,15 +144,35 @@ const Performance = () => {
           </Card>
         </div>
 
-        <ActivityStats 
-          selectedPeriod={selectedPeriod}
-          selectedDate={selectedDate}
-        />
+        {performanceData.dailyStats.length === 0 ? (
+          <Card>
+            <CardContent className="p-6">
+              <div className="text-center text-muted-foreground">
+                <p className="mb-2">📊 Aucune donnée d'activité trouvée pour Aymen Boubakri</p>
+                <p className="text-sm">
+                  Cela peut signifier :
+                </p>
+                <ul className="text-sm mt-2 space-y-1">
+                  <li>• Aucune session de connexion enregistrée</li>
+                  <li>• Les données d'activité ne sont pas encore collectées</li>
+                  <li>• Le système de suivi n'est pas encore activé</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <ActivityStats 
+              selectedPeriod={selectedPeriod}
+              selectedDate={selectedDate}
+            />
 
-        <ActivityTable 
-          selectedPeriod={selectedPeriod}
-          selectedDate={selectedDate}
-        />
+            <ActivityTable 
+              selectedPeriod={selectedPeriod}
+              selectedDate={selectedDate}
+            />
+          </>
+        )}
       </div>
     </AdminRoute>
   );

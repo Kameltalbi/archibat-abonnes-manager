@@ -27,13 +27,12 @@ interface PerformanceData {
 }
 
 export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
-  // Requête optimisée pour trouver Aymen avec une seule requête
+  // Requête pour trouver Aymen avec une seule requête
   const { data: aymenUserId } = useQuery({
     queryKey: ['aymen-user-id'],
     queryFn: async (): Promise<string | null> => {
-      console.log('🔍 Recherche optimisée de l\'utilisateur Aymen...');
+      console.log('🔍 Recherche de l\'utilisateur Aymen...');
       
-      // Une seule requête avec plusieurs conditions OR
       const { data, error } = await supabase
         .from('profiles')
         .select('id, full_name, email')
@@ -54,17 +53,18 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
 
       return null;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes - les données utilisateur changent rarement
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
-  // Requête pour les données de performance avec cache amélioré
+  // Requête pour les données de performance
   return useQuery({
     queryKey: ['aymen-performance-data', aymenUserId, period, format(selectedDate, 'yyyy-MM-dd')],
     queryFn: async (): Promise<PerformanceData> => {
-      console.log('📊 Récupération optimisée des données de performance pour Aymen');
+      console.log('📊 Récupération des données de performance pour Aymen');
       
       if (!aymenUserId) {
+        console.log('❌ Pas d\'ID utilisateur pour Aymen');
         return {
           dailyStats: [],
           totalActiveMinutes: 0,
@@ -96,6 +96,12 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
           endDate = new Date(selectedDate);
       }
 
+      console.log('📅 Période recherchée:', {
+        start: format(startDate, 'yyyy-MM-dd'),
+        end: format(endDate, 'yyyy-MM-dd'),
+        userId: aymenUserId
+      });
+
       const { data, error } = await supabase
         .from('daily_activity_summary')
         .select('*')
@@ -110,6 +116,7 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
       }
 
       console.log('📈 Données d\'activité trouvées:', data?.length || 0, 'enregistrements');
+      console.log('📊 Données brutes:', data);
 
       const dailyStats = data || [];
       const totalActiveMinutes = dailyStats.reduce((sum, day) => sum + day.total_active_minutes, 0);
@@ -127,7 +134,7 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
       };
     },
     enabled: !!aymenUserId,
-    staleTime: 2 * 60 * 1000, // 2 minutes - données d'activité plus récentes
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30 * 1000, // 30 secondes pour voir les nouvelles données rapidement
+    gcTime: 2 * 60 * 1000,
   });
 };
