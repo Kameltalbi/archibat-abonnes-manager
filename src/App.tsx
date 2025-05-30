@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,7 +18,6 @@ import WeeklyProgram from "./pages/WeeklyProgram";
 import Settings from "./pages/Settings";
 import Prospection from "./pages/Prospection";
 import NewSubscriber from "./pages/NewSubscriber";
-import Performance from "./pages/Performance";
 
 const queryClient = new QueryClient();
 
@@ -83,12 +83,6 @@ const App = () => (
           <Route path="/parametres" element={
             <AppLayout>
               <Settings />
-            </AppLayout>
-          } />
-          {/* Add route for Performance */}
-          <Route path="/performance" element={
-            <AppLayout>
-              <Performance />
             </AppLayout>
           } />
           {/* Add route for Prospection */}
