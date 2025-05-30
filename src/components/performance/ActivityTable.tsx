@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Download, FileText } from 'lucide-react';
-import { usePerformanceData } from '@/hooks/usePerformanceData';
+import { useAymenPerformanceData } from '@/hooks/useAymenPerformanceData';
 
 interface ActivityTableProps {
   selectedPeriod: string;
@@ -16,7 +16,7 @@ export const ActivityTable: React.FC<ActivityTableProps> = ({
   selectedPeriod, 
   selectedDate 
 }) => {
-  const { data: performanceData, isLoading } = usePerformanceData(selectedPeriod, selectedDate);
+  const { data: performanceData, isLoading } = useAymenPerformanceData(selectedPeriod, selectedDate);
 
   const getStatusBadge = (status: string) => {
     const config = {
@@ -77,11 +77,26 @@ export const ActivityTable: React.FC<ActivityTableProps> = ({
     );
   }
 
+  if (!performanceData?.aymenUserId) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Détail de l'activité - Aymen Boubakri</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-muted-foreground py-8">
+            Utilisateur Aymen Boubakri non trouvé dans la base de données
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
         <div className="flex justify-between items-center">
-          <CardTitle>Détail de l'activité</CardTitle>
+          <CardTitle>Détail de l'activité - Aymen Boubakri</CardTitle>
           <div className="flex space-x-2">
             <Button variant="outline" size="sm" onClick={exportToPDF}>
               <FileText className="h-4 w-4 mr-2" />
@@ -134,7 +149,7 @@ export const ActivityTable: React.FC<ActivityTableProps> = ({
             {(!performanceData?.dailyStats || performanceData.dailyStats.length === 0) && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-muted-foreground">
-                  Aucune donnée d'activité trouvée pour cette période
+                  Aucune donnée d'activité trouvée pour Aymen Boubakri sur cette période
                 </TableCell>
               </TableRow>
             )}

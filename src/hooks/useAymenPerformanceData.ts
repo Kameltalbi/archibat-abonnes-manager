@@ -23,15 +23,44 @@ interface PerformanceData {
   expectedMinutes: number;
   overallPerformance: number;
   alertDays: number;
+  aymenUserId: string | null;
 }
 
-// User ID d'Aymen Boubakri - à remplacer par le vrai ID depuis la base de données
-const AYMEN_USER_ID = 'aymen-boubakri-user-id'; // TODO: Remplacer par le vrai UUID
+export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
+  // D'abord, on récupère l'ID d'Aymen
+  const { data: aymenUserId } = useQuery({
+    queryKey: ['aymen-user-id'],
+    queryFn: async (): Promise<string | null> => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .or('full_name.ilike.%aymen%,email.ilike.%aymen%,full_name.ilike.%boubakri%,email.ilike.%boubakri%')
+        .maybeSingle();
 
-export const usePerformanceData = (period: string, selectedDate: Date) => {
+      if (error) {
+        console.error('Erreur lors de la recherche de l\'utilisateur Aymen:', error);
+        return null;
+      }
+
+      return data?.id || null;
+    },
+  });
+
+  // Ensuite, on récupère ses données de performance
   return useQuery({
-    queryKey: ['performance-data', AYMEN_USER_ID, period, format(selectedDate, 'yyyy-MM-dd')],
+    queryKey: ['aymen-performance-data', aymenUserId, period, format(selectedDate, 'yyyy-MM-dd')],
     queryFn: async (): Promise<PerformanceData> => {
+      if (!aymenUserId) {
+        return {
+          dailyStats: [],
+          totalActiveMinutes: 0,
+          expectedMinutes: 0,
+          overallPerformance: 0,
+          alertDays: 0,
+          aymenUserId: null
+        };
+      }
+
       let startDate: Date;
       let endDate: Date;
 
@@ -56,7 +85,7 @@ export const usePerformanceData = (period: string, selectedDate: Date) => {
       const { data, error } = await supabase
         .from('daily_activity_summary')
         .select('*')
-        .eq('user_id', AYMEN_USER_ID) // Utilisation de l'ID d'Aymen au lieu de l'utilisateur connecté
+        .eq('user_id', aymenUserId)
         .gte('date', format(startDate, 'yyyy-MM-dd'))
         .lte('date', format(endDate, 'yyyy-MM-dd'))
         .order('date', { ascending: false });
@@ -77,30 +106,10 @@ export const usePerformanceData = (period: string, selectedDate: Date) => {
         totalActiveMinutes,
         expectedMinutes,
         overallPerformance,
-        alertDays
+        alertDays,
+        aymenUserId
       };
     },
-  });
-};
-
-// Hook pour récupérer l'ID d'Aymen depuis la base de données
-export const useAymenUserId = () => {
-  return useQuery({
-    queryKey: ['aymen-user-id'],
-    queryFn: async (): Promise<string | null> => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .ilike('email', '%aymen%')
-        .or('full_name.ilike.%aymen%,email.ilike.%boubakri%')
-        .single();
-
-      if (error) {
-        console.error('Erreur lors de la recherche de l\'utilisateur Aymen:', error);
-        return null;
-      }
-
-      return data?.id || null;
-    },
+    enabled: !!aymenUserId,
   });
 };

@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { usePerformanceData } from '@/hooks/usePerformanceData';
+import { useAymenPerformanceData } from '@/hooks/useAymenPerformanceData';
 
 interface ActivityStatsProps {
   selectedPeriod: string;
@@ -14,7 +14,7 @@ export const ActivityStats: React.FC<ActivityStatsProps> = ({
   selectedPeriod, 
   selectedDate 
 }) => {
-  const { data: performanceData, isLoading } = usePerformanceData(selectedPeriod, selectedDate);
+  const { data: performanceData, isLoading } = useAymenPerformanceData(selectedPeriod, selectedDate);
 
   if (isLoading) {
     return (
@@ -23,6 +23,18 @@ export const ActivityStats: React.FC<ActivityStatsProps> = ({
           <div className="animate-pulse space-y-4">
             <div className="h-4 bg-gray-200 rounded w-3/4"></div>
             <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!performanceData?.aymenUserId) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="text-center text-muted-foreground">
+            Utilisateur Aymen Boubakri non trouvé dans la base de données
           </div>
         </CardContent>
       </Card>
@@ -53,7 +65,7 @@ export const ActivityStats: React.FC<ActivityStatsProps> = ({
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Temps de travail quotidien</CardTitle>
+          <CardTitle>Temps de travail quotidien - Aymen Boubakri</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {performanceData?.dailyStats?.map((day, index) => {
@@ -85,6 +97,11 @@ export const ActivityStats: React.FC<ActivityStatsProps> = ({
               </div>
             );
           })}
+          {(!performanceData?.dailyStats || performanceData.dailyStats.length === 0) && (
+            <div className="text-center text-muted-foreground py-4">
+              Aucune donnée d'activité trouvée pour Aymen Boubakri sur cette période
+            </div>
+          )}
         </CardContent>
       </Card>
 
