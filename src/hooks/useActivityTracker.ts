@@ -175,10 +175,7 @@ export const useActivityTracker = () => {
       // Mise à jour du résumé quotidien avec la première connexion
       await updateDailySummary(user.id, data.id, loginTime, loginTime, 0, 1);
 
-      toast({
-        title: "Suivi d'activité démarré",
-        description: "Votre temps de travail est maintenant suivi.",
-      });
+      // Notification supprimée - plus de toast de démarrage
     } catch (error) {
       console.error('❌ Erreur lors du démarrage de session:', error);
       toast({
