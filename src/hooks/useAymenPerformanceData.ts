@@ -27,25 +27,63 @@ interface PerformanceData {
 }
 
 export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
-  // D'abord, on récupère l'ID d'Aymen avec une requête plus précise
+  // D'abord, on récupère l'ID d'Aymen avec plusieurs stratégies de recherche
   const { data: aymenUserId } = useQuery({
     queryKey: ['aymen-user-id'],
     queryFn: async (): Promise<string | null> => {
-      console.log('Recherche de l\'utilisateur Aymen...');
+      console.log('🔍 Recherche de l\'utilisateur Aymen...');
       
-      const { data, error } = await supabase
+      // Stratégie 1: Recherche par nom complet
+      let { data, error } = await supabase
         .from('profiles')
         .select('id, full_name, email')
-        .or('full_name.ilike.%Aymen Boubakri%,email.ilike.%aymen.boubakri%')
+        .ilike('full_name', '%aymen%')
         .maybeSingle();
 
-      if (error) {
-        console.error('Erreur lors de la recherche de l\'utilisateur Aymen:', error);
-        return null;
+      if (data) {
+        console.log('✅ Aymen trouvé par nom complet:', data);
+        return data.id;
       }
 
-      console.log('Résultat de la recherche Aymen:', data);
-      return data?.id || null;
+      // Stratégie 2: Recherche par email
+      ({ data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .ilike('email', '%aymen%')
+        .maybeSingle());
+
+      if (data) {
+        console.log('✅ Aymen trouvé par email:', data);
+        return data.id;
+      }
+
+      // Stratégie 3: Recherche par nom de famille
+      ({ data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .ilike('full_name', '%boubakri%')
+        .maybeSingle());
+
+      if (data) {
+        console.log('✅ Aymen trouvé par nom de famille:', data);
+        return data.id;
+      }
+
+      // Stratégie 4: Lister tous les utilisateurs pour debug
+      const { data: allUsers } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .limit(10);
+
+      console.log('👥 Tous les utilisateurs disponibles:', allUsers);
+
+      if (error) {
+        console.error('❌ Erreur lors de la recherche:', error);
+      } else {
+        console.log('⚠️ Aucun utilisateur Aymen trouvé');
+      }
+
+      return null;
     },
   });
 
@@ -53,10 +91,10 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
   return useQuery({
     queryKey: ['aymen-performance-data', aymenUserId, period, format(selectedDate, 'yyyy-MM-dd')],
     queryFn: async (): Promise<PerformanceData> => {
-      console.log('Récupération des données de performance pour Aymen, user_id:', aymenUserId);
+      console.log('📊 Récupération des données de performance pour Aymen, user_id:', aymenUserId);
       
       if (!aymenUserId) {
-        console.log('Aucun user_id trouvé pour Aymen');
+        console.log('⚠️ Aucun user_id trouvé pour Aymen');
         return {
           dailyStats: [],
           totalActiveMinutes: 0,
@@ -88,7 +126,7 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
           endDate = new Date(selectedDate);
       }
 
-      console.log('Période de recherche:', format(startDate, 'yyyy-MM-dd'), 'à', format(endDate, 'yyyy-MM-dd'));
+      console.log('📅 Période de recherche:', format(startDate, 'yyyy-MM-dd'), 'à', format(endDate, 'yyyy-MM-dd'));
 
       const { data, error } = await supabase
         .from('daily_activity_summary')
@@ -99,11 +137,11 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
         .order('date', { ascending: false });
 
       if (error) {
-        console.error('Erreur lors de la récupération des données de performance pour Aymen:', error);
+        console.error('❌ Erreur lors de la récupération des données:', error);
         throw error;
       }
 
-      console.log('Données d\'activité trouvées pour Aymen:', data);
+      console.log('📈 Données d\'activité trouvées pour Aymen:', data);
 
       const dailyStats = data || [];
       const totalActiveMinutes = dailyStats.reduce((sum, day) => sum + day.total_active_minutes, 0);
