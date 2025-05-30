@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Monitor, AlertCircle, User } from 'lucide-react';
+import { Clock, Monitor, AlertCircle, User, RefreshCw } from 'lucide-react';
 import { useAymenSessions } from '@/hooks/useAymenSessions';
 
 interface SessionsListProps {
@@ -15,7 +15,7 @@ export const SessionsList: React.FC<SessionsListProps> = ({
   selectedPeriod, 
   selectedDate 
 }) => {
-  const { data: sessions, isLoading } = useAymenSessions(selectedDate, selectedPeriod);
+  const { data: sessions, isLoading, error, refetch } = useAymenSessions(selectedDate, selectedPeriod);
 
   const formatTime = (timeString: string | null) => {
     if (!timeString) return '-';
@@ -83,6 +83,31 @@ export const SessionsList: React.FC<SessionsListProps> = ({
     );
   }
 
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-red-600">
+            <AlertCircle className="h-5 w-5" />
+            Erreur de chargement
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-red-600 mb-4">
+            Erreur lors du chargement des sessions : {error.message}
+          </p>
+          <button 
+            onClick={() => refetch()} 
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Réessayer
+          </button>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -92,6 +117,14 @@ export const SessionsList: React.FC<SessionsListProps> = ({
           <Badge variant="outline" className="ml-2">
             {sessions?.length || 0} session{(sessions?.length || 0) > 1 ? 's' : ''}
           </Badge>
+          <button 
+            onClick={() => refetch()} 
+            className="ml-auto flex items-center gap-1 px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
+            title="Actualiser"
+          >
+            <RefreshCw className="h-3 w-3" />
+            Actualiser
+          </button>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -197,9 +230,22 @@ export const SessionsList: React.FC<SessionsListProps> = ({
           <div className="text-center text-muted-foreground py-12">
             <Monitor className="h-16 w-16 mx-auto mb-4 text-gray-300" />
             <p className="text-lg font-medium mb-2">Aucune session trouvée</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 mb-4">
               Aucune session de connexion n'a été enregistrée pour Aymen Boubakri sur cette période.
             </p>
+            <div className="text-xs text-gray-400 bg-gray-50 p-3 rounded-md max-w-md mx-auto">
+              <p className="font-medium mb-2">Informations de débogage :</p>
+              <p>• Période sélectionnée : {selectedPeriod}</p>
+              <p>• Date : {selectedDate.toLocaleDateString('fr-FR')}</p>
+              <p>• Sessions trouvées : {sessions?.length || 0}</p>
+            </div>
+            <button 
+              onClick={() => refetch()} 
+              className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 mx-auto"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Actualiser
+            </button>
           </div>
         )}
       </CardContent>
