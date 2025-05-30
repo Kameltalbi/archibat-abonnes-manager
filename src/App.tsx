@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { AppLayout } from "./components/layout/AppLayout";
+import { AdminRoute } from "./components/auth/AdminRoute";
 import Dashboard from "./pages/Dashboard";
 import LocalSubscribers from "./pages/LocalSubscribers";
 import InternationalSubscribers from "./pages/InternationalSubscribers";
@@ -91,10 +92,12 @@ const App = () => (
               <Prospection />
             </AppLayout>
           } />
-          {/* Add route for Performance */}
+          {/* Add route for Performance - Protected by AdminRoute */}
           <Route path="/performance" element={
             <AppLayout>
-              <Performance />
+              <AdminRoute>
+                <Performance />
+              </AdminRoute>
             </AppLayout>
           } />
           <Route path="*" element={<NotFound />} />
