@@ -27,55 +27,24 @@ interface PerformanceData {
 }
 
 export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
-  // D'abord, on récupère l'ID d'Aymen avec plusieurs stratégies de recherche
+  // Requête optimisée pour trouver Aymen avec une seule requête
   const { data: aymenUserId } = useQuery({
     queryKey: ['aymen-user-id'],
     queryFn: async (): Promise<string | null> => {
-      console.log('🔍 Recherche de l\'utilisateur Aymen...');
+      console.log('🔍 Recherche optimisée de l\'utilisateur Aymen...');
       
-      // Stratégie 1: Recherche par nom complet
-      let { data, error } = await supabase
+      // Une seule requête avec plusieurs conditions OR
+      const { data, error } = await supabase
         .from('profiles')
         .select('id, full_name, email')
-        .ilike('full_name', '%aymen%')
+        .or('full_name.ilike.%aymen%,email.ilike.%aymen%,full_name.ilike.%boubakri%')
+        .limit(1)
         .maybeSingle();
 
       if (data) {
-        console.log('✅ Aymen trouvé par nom complet:', data);
+        console.log('✅ Aymen trouvé:', data);
         return data.id;
       }
-
-      // Stratégie 2: Recherche par email
-      ({ data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, email')
-        .ilike('email', '%aymen%')
-        .maybeSingle());
-
-      if (data) {
-        console.log('✅ Aymen trouvé par email:', data);
-        return data.id;
-      }
-
-      // Stratégie 3: Recherche par nom de famille
-      ({ data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, email')
-        .ilike('full_name', '%boubakri%')
-        .maybeSingle());
-
-      if (data) {
-        console.log('✅ Aymen trouvé par nom de famille:', data);
-        return data.id;
-      }
-
-      // Stratégie 4: Lister tous les utilisateurs pour debug
-      const { data: allUsers } = await supabase
-        .from('profiles')
-        .select('id, full_name, email')
-        .limit(10);
-
-      console.log('👥 Tous les utilisateurs disponibles:', allUsers);
 
       if (error) {
         console.error('❌ Erreur lors de la recherche:', error);
@@ -85,16 +54,17 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
 
       return null;
     },
+    staleTime: 5 * 60 * 1000, // 5 minutes - les données utilisateur changent rarement
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  // Ensuite, on récupère ses données de performance
+  // Requête pour les données de performance avec cache amélioré
   return useQuery({
     queryKey: ['aymen-performance-data', aymenUserId, period, format(selectedDate, 'yyyy-MM-dd')],
     queryFn: async (): Promise<PerformanceData> => {
-      console.log('📊 Récupération des données de performance pour Aymen, user_id:', aymenUserId);
+      console.log('📊 Récupération optimisée des données de performance pour Aymen');
       
       if (!aymenUserId) {
-        console.log('⚠️ Aucun user_id trouvé pour Aymen');
         return {
           dailyStats: [],
           totalActiveMinutes: 0,
@@ -126,8 +96,6 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
           endDate = new Date(selectedDate);
       }
 
-      console.log('📅 Période de recherche:', format(startDate, 'yyyy-MM-dd'), 'à', format(endDate, 'yyyy-MM-dd'));
-
       const { data, error } = await supabase
         .from('daily_activity_summary')
         .select('*')
@@ -141,7 +109,7 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
         throw error;
       }
 
-      console.log('📈 Données d\'activité trouvées pour Aymen:', data);
+      console.log('📈 Données d\'activité trouvées:', data?.length || 0, 'enregistrements');
 
       const dailyStats = data || [];
       const totalActiveMinutes = dailyStats.reduce((sum, day) => sum + day.total_active_minutes, 0);
@@ -159,5 +127,7 @@ export const useAymenPerformanceData = (period: string, selectedDate: Date) => {
       };
     },
     enabled: !!aymenUserId,
+    staleTime: 2 * 60 * 1000, // 2 minutes - données d'activité plus récentes
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 };

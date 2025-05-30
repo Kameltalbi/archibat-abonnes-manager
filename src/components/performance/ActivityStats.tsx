@@ -10,11 +10,31 @@ interface ActivityStatsProps {
   selectedDate: Date;
 }
 
-export const ActivityStats: React.FC<ActivityStatsProps> = ({ 
+const ActivityStats: React.FC<ActivityStatsProps> = React.memo(({ 
   selectedPeriod, 
   selectedDate 
 }) => {
   const { data: performanceData, isLoading } = useAymenPerformanceData(selectedPeriod, selectedDate);
+
+  const getStatusColor = React.useCallback((status: string) => {
+    switch (status) {
+      case 'excellent': return 'bg-green-500';
+      case 'good': return 'bg-blue-500';
+      case 'warning': return 'bg-yellow-500';
+      case 'poor': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  }, []);
+
+  const getStatusText = React.useCallback((status: string) => {
+    switch (status) {
+      case 'excellent': return 'Excellent';
+      case 'good': return 'Bon';
+      case 'warning': return 'Attention';
+      case 'poor': return 'Insuffisant';
+      default: return 'En attente';
+    }
+  }, []);
 
   if (isLoading) {
     return (
@@ -41,26 +61,6 @@ export const ActivityStats: React.FC<ActivityStatsProps> = ({
     );
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'excellent': return 'bg-green-500';
-      case 'good': return 'bg-blue-500';
-      case 'warning': return 'bg-yellow-500';
-      case 'poor': return 'bg-red-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'excellent': return 'Excellent';
-      case 'good': return 'Bon';
-      case 'warning': return 'Attention';
-      case 'poor': return 'Insuffisant';
-      default: return 'En attente';
-    }
-  };
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card>
@@ -69,12 +69,12 @@ export const ActivityStats: React.FC<ActivityStatsProps> = ({
         </CardHeader>
         <CardContent className="space-y-4">
           {performanceData?.dailyStats?.map((day, index) => {
-            const percentage = (day.total_active_minutes / day.expected_work_minutes) * 100;
+            const percentage = Math.min((day.total_active_minutes / day.expected_work_minutes) * 100, 100);
             const hours = Math.floor(day.total_active_minutes / 60);
             const minutes = day.total_active_minutes % 60;
             
             return (
-              <div key={index} className="space-y-2">
+              <div key={day.id || index} className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium">
                     {new Date(day.date).toLocaleDateString('fr-FR', { 
@@ -93,7 +93,7 @@ export const ActivityStats: React.FC<ActivityStatsProps> = ({
                     </Badge>
                   </div>
                 </div>
-                <Progress value={Math.min(percentage, 100)} className="h-2" />
+                <Progress value={percentage} className="h-2" />
               </div>
             );
           })}
@@ -142,4 +142,8 @@ export const ActivityStats: React.FC<ActivityStatsProps> = ({
       </Card>
     </div>
   );
-};
+});
+
+ActivityStats.displayName = 'ActivityStats';
+
+export { ActivityStats };
