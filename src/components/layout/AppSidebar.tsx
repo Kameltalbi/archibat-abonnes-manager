@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -39,7 +40,7 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
   const { isAdmin } = useUserRole();
 
   const menuItems = [
-    { title: "Dashboard", icon: ChartBarIcon, url: "/" },
+    { title: "Dashboard", icon: ChartBarIcon, url: "/dashboard" },
     { title: "Abonnés locaux", icon: UserIcon, url: "/abonnes-locaux" },
     { title: "Abonnés internationaux", icon: EuroIcon, url: "/abonnes-internationaux" },
     { title: "Institutions", icon: UsersIcon, url: "/institutions" },
