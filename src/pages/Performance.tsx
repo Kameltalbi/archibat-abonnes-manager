@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { ActivityStats } from '@/components/performance/ActivityStats';
@@ -8,6 +7,7 @@ import { AdminRoute } from '@/components/auth/AdminRoute';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Clock, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useAymenPerformanceData } from '@/hooks/useAymenPerformanceData';
+import { SessionsList } from '@/components/performance/SessionsList';
 
 const Performance = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('week');
@@ -148,7 +148,7 @@ const Performance = () => {
           </Card>
         </div>
 
-        {performanceData.dailyStats.length === 0 ? (
+        {performanceData?.dailyStats.length === 0 ? (
           <Card>
             <CardContent className="p-6">
               <div className="text-center text-muted-foreground">
@@ -167,6 +167,11 @@ const Performance = () => {
         ) : (
           <>
             <ActivityStats 
+              selectedPeriod={selectedPeriod}
+              selectedDate={selectedDate}
+            />
+
+            <SessionsList 
               selectedPeriod={selectedPeriod}
               selectedDate={selectedDate}
             />
