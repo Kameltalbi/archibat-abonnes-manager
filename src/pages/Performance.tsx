@@ -27,7 +27,7 @@ const Performance = () => {
   const overallPerformance = performanceData?.overallPerformance || 0;
   const alertDays = performanceData?.alertDays || 0;
 
-  // Calculer le total des sessions pour la période
+  // Calculer le total RÉEL des sessions pour la période sélectionnée
   const totalSessions = performanceData?.dailyStats?.reduce((sum, day) => sum + day.total_sessions, 0) || 0;
 
   if (isLoading) {
