@@ -1,0 +1,128 @@
+
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { usePerformanceData } from '@/hooks/usePerformanceData';
+
+interface ActivityStatsProps {
+  selectedPeriod: string;
+  selectedDate: Date;
+}
+
+export const ActivityStats: React.FC<ActivityStatsProps> = ({ 
+  selectedPeriod, 
+  selectedDate 
+}) => {
+  const { data: performanceData, isLoading } = usePerformanceData(selectedPeriod, selectedDate);
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'excellent': return 'bg-green-500';
+      case 'good': return 'bg-blue-500';
+      case 'warning': return 'bg-yellow-500';
+      case 'poor': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'excellent': return 'Excellent';
+      case 'good': return 'Bon';
+      case 'warning': return 'Attention';
+      case 'poor': return 'Insuffisant';
+      default: return 'En attente';
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Temps de travail quotidien</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {performanceData?.dailyStats?.map((day, index) => {
+            const percentage = (day.total_active_minutes / day.expected_work_minutes) * 100;
+            const hours = Math.floor(day.total_active_minutes / 60);
+            const minutes = day.total_active_minutes % 60;
+            
+            return (
+              <div key={index} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">
+                    {new Date(day.date).toLocaleDateString('fr-FR', { 
+                      weekday: 'long', 
+                      day: 'numeric', 
+                      month: 'short' 
+                    })}
+                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm">{hours}h {minutes}min</span>
+                    <Badge 
+                      variant="secondary" 
+                      className={`${getStatusColor(day.performance_status)} text-white`}
+                    >
+                      {getStatusText(day.performance_status)}
+                    </Badge>
+                  </div>
+                </div>
+                <Progress value={Math.min(percentage, 100)} className="h-2" />
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Statistiques de la période</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <span>Temps total travaillé :</span>
+              <span className="font-bold">
+                {Math.floor((performanceData?.totalActiveMinutes || 0) / 60)}h{' '}
+                {(performanceData?.totalActiveMinutes || 0) % 60}min
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Temps attendu :</span>
+              <span className="font-bold">
+                {Math.floor((performanceData?.expectedMinutes || 0) / 60)}h{' '}
+                {(performanceData?.expectedMinutes || 0) % 60}min
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Performance globale :</span>
+              <span className="font-bold text-green-600">
+                {performanceData?.overallPerformance || 0}%
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span>Jours avec alertes :</span>
+              <span className="font-bold text-red-600">
+                {performanceData?.alertDays || 0}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};

@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useActivityTracking } from './useActivityTracking';
 
 interface ActivityTrackerState {
   isActive: boolean;
@@ -22,6 +23,7 @@ export const useActivityTracker = () => {
     inactivityLevel: 'none',
   });
 
+  const { updateDailySummary, calculateActiveTime } = useActivityTracking();
   const inactivityTimer = useRef<NodeJS.Timeout>();
   const reminderTimer1 = useRef<NodeJS.Timeout>();
   const reminderTimer2 = useRef<NodeJS.Timeout>();
@@ -148,6 +150,7 @@ export const useActivityTracker = () => {
 
       console.log('👤 Starting session for user:', user.email);
 
+      const loginTime = new Date();
       const { data, error } = await supabase
         .from('user_sessions')
         .insert({
@@ -169,6 +172,9 @@ export const useActivityTracker = () => {
       resetInactivityTimer();
       isTrackingRef.current = true;
 
+      // Mise à jour du résumé quotidien avec la première connexion
+      await updateDailySummary(user.id, data.id, loginTime, loginTime, 0, 1);
+
       toast({
         title: "Suivi d'activité démarré",
         description: "Votre temps de travail est maintenant suivi.",
@@ -181,7 +187,7 @@ export const useActivityTracker = () => {
         variant: "destructive",
       });
     }
-  }, [resetInactivityTimer]);
+  }, [resetInactivityTimer, updateDailySummary]);
 
   const endSession = useCallback(async () => {
     if (!state.sessionId) return;
@@ -189,13 +195,22 @@ export const useActivityTracker = () => {
     console.log('🔚 Ending session:', state.sessionId);
     
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const endTime = new Date();
+      
       await supabase
         .from('user_sessions')
         .update({
-          logout_time: new Date().toISOString(),
+          logout_time: endTime.toISOString(),
           status: 'logged_out',
         })
         .eq('id', state.sessionId);
+
+      // Calculer le temps actif final et mettre à jour le résumé
+      if (user) {
+        const activeMinutes = await calculateActiveTime(state.sessionId);
+        await updateDailySummary(user.id, state.sessionId, undefined, endTime, activeMinutes, 0);
+      }
 
       clearAllTimers();
       isTrackingRef.current = false;
@@ -204,7 +219,7 @@ export const useActivityTracker = () => {
     } catch (error) {
       console.error('❌ Erreur lors de la fin de session:', error);
     }
-  }, [state.sessionId, clearAllTimers]);
+  }, [state.sessionId, clearAllTimers, calculateActiveTime, updateDailySummary]);
 
   const dismissWarning = useCallback(() => {
     setState(prev => ({ ...prev, inactivityWarning: false }));
@@ -215,11 +230,19 @@ export const useActivityTracker = () => {
   useEffect(() => {
     if (!isTrackingRef.current) return;
 
-    const handleActivity = () => {
+    const handleActivity = async () => {
       if (!state.isActive) {
         markAsActive();
       } else {
         resetInactivityTimer();
+      }
+
+      // Mise à jour périodique de l'activité
+      if (state.sessionId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await updateDailySummary(user.id, state.sessionId, undefined, new Date(), 0, 0);
+        }
       }
     };
 
@@ -234,7 +257,7 @@ export const useActivityTracker = () => {
         document.removeEventListener(event, handleActivity, true);
       });
     };
-  }, [state.isActive, markAsActive, resetInactivityTimer]);
+  }, [state.isActive, state.sessionId, markAsActive, resetInactivityTimer, updateDailySummary]);
 
   // Gestion de la fermeture de page
   useEffect(() => {

@@ -93,6 +93,48 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_activity_summary: {
+        Row: {
+          created_at: string
+          date: string
+          expected_work_minutes: number | null
+          first_login_time: string | null
+          id: string
+          last_activity_time: string | null
+          performance_status: string | null
+          total_active_minutes: number | null
+          total_sessions: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          expected_work_minutes?: number | null
+          first_login_time?: string | null
+          id?: string
+          last_activity_time?: string | null
+          performance_status?: string | null
+          total_active_minutes?: number | null
+          total_sessions?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          expected_work_minutes?: number | null
+          first_login_time?: string | null
+          id?: string
+          last_activity_time?: string | null
+          performance_status?: string | null
+          total_active_minutes?: number | null
+          total_sessions?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       institutions: {
         Row: {
           adresse: string | null
@@ -686,6 +728,10 @@ export type Database = {
         Args: { p_session_id: string }
         Returns: number
       }
+      calculate_performance_status: {
+        Args: { active_minutes: number; expected_minutes?: number }
+        Returns: string
+      }
       get_user_role: {
         Args: { user_id: string }
         Returns: string
@@ -693,6 +739,17 @@ export type Database = {
       has_permission: {
         Args: { user_id: string; permission_key: string }
         Returns: boolean
+      }
+      update_daily_summary: {
+        Args: {
+          p_user_id: string
+          p_date: string
+          p_login_time?: string
+          p_activity_time?: string
+          p_active_minutes?: number
+          p_session_count?: number
+        }
+        Returns: undefined
       }
     }
     Enums: {
