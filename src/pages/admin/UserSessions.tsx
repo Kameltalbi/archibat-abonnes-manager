@@ -1,8 +1,9 @@
+
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase'; // ajuste si tu n'utilises pas @
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { Navigate } from 'react-router-dom';
-import { useUser } from '@/hooks/useUser'; // adapte si besoin
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface Session {
   id: string;
@@ -13,11 +14,11 @@ interface Session {
 }
 
 export default function UserSessionsPage() {
-  const { user } = useUser();
+  const { isAdmin } = useUserRole();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
 
-  if (user?.role !== 'admin') {
+  if (!isAdmin) {
     return <Navigate to="/dashboard" />;
   }
 
@@ -25,7 +26,13 @@ export default function UserSessionsPage() {
     const fetchSessions = async () => {
       const { data, error } = await supabase
         .from('user_sessions')
-        .select('id, user_id, login_time, logout_time, auth.users(email)')
+        .select(`
+          id, 
+          user_id, 
+          login_time, 
+          logout_time,
+          profiles!inner(email)
+        `)
         .order('login_time', { ascending: false });
 
       if (error) {
@@ -42,15 +49,20 @@ export default function UserSessionsPage() {
         let duration = 'En cours';
         if (logout) {
           const diffMs = logout.getTime() - login.getTime();
-          const totalSeconds = Math.floor(diffMs / 1000);
-          const minutes = Math.floor(totalSeconds / 60);
-          const seconds = totalSeconds % 60;
-          duration = `${minutes} min ${seconds} sec`;
+          const totalMinutes = Math.floor(diffMs / (1000 * 60));
+          
+          if (totalMinutes >= 60) {
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            duration = `${hours}h ${minutes}min`;
+          } else {
+            duration = `${totalMinutes} min`;
+          }
         }
 
         return {
           id: s.id,
-          email: s.auth?.users?.email || 'Inconnu',
+          email: s.profiles?.email || 'Inconnu',
           login_time: format(login, 'dd/MM/yyyy HH:mm:ss'),
           logout_time: logout ? format(logout, 'dd/MM/yyyy HH:mm:ss') : '—',
           duration,
