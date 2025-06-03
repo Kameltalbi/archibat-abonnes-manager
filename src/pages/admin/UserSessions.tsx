@@ -29,25 +29,42 @@ export default function UserSessionsPage() {
   useEffect(() => {
     const fetchSessions = async () => {
       try {
-        const { data, error } = await supabase
+        // First get the sessions
+        const { data: sessionsData, error: sessionsError } = await supabase
           .from('user_sessions')
-          .select(`
-            id, 
-            user_id, 
-            login_time, 
-            logout_time,
-            profiles!inner(full_name)
-          `)
+          .select('id, user_id, login_time, logout_time')
           .order('login_time', { ascending: false });
 
-        if (error) {
-          console.error('Error fetching sessions:', error);
+        if (sessionsError) {
+          console.error('Error fetching sessions:', sessionsError);
           setError('Erreur lors du chargement des sessions');
           return;
         }
 
-        if (data) {
-          const formatted = data.map((s: any) => {
+        if (sessionsData && sessionsData.length > 0) {
+          // Get unique user IDs
+          const userIds = [...new Set(sessionsData.map(s => s.user_id))];
+          
+          // Get user profiles
+          const { data: profilesData, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, full_name')
+            .in('id', userIds);
+
+          if (profilesError) {
+            console.error('Error fetching profiles:', profilesError);
+            setError('Erreur lors du chargement des profils utilisateur');
+            return;
+          }
+
+          // Create a map of user profiles
+          const profilesMap = new Map();
+          profilesData?.forEach(profile => {
+            profilesMap.set(profile.id, profile.full_name);
+          });
+
+          // Format the data
+          const formatted = sessionsData.map((s: any) => {
             const login = new Date(s.login_time);
             const logout = s.logout_time ? new Date(s.logout_time) : null;
             const duration = logout
@@ -57,7 +74,7 @@ export default function UserSessionsPage() {
             return {
               id: s.id,
               user_id: s.user_id,
-              user_name: s.profiles?.full_name || 'Utilisateur inconnu',
+              user_name: profilesMap.get(s.user_id) || 'Utilisateur inconnu',
               login_time: format(login, 'dd/MM/yyyy HH:mm:ss'),
               logout_time: logout ? format(logout, 'dd/MM/yyyy HH:mm:ss') : '—',
               duration,
