@@ -22,16 +22,6 @@ export default function UserSessionsPage() {
   console.log('UserSessions - userRole:', userRole);
   console.log('UserSessions - isLoading:', isLoading);
 
-  // Attendre que le chargement soit terminé avant de rediriger
-  if (isLoading) {
-    return <div className="p-6">Chargement des permissions...</div>;
-  }
-
-  if (!isAdmin) {
-    console.log('Redirection vers dashboard - pas admin');
-    return <Navigate to="/dashboard" />;
-  }
-
   useEffect(() => {
     const fetchSessions = async () => {
       const { data, error } = await supabase
@@ -83,8 +73,23 @@ export default function UserSessionsPage() {
       setLoading(false);
     };
 
-    fetchSessions();
-  }, []);
+    // Ne charger les données que si l'utilisateur est admin
+    if (!isLoading && isAdmin) {
+      fetchSessions();
+    } else if (!isLoading && !isAdmin) {
+      setLoading(false);
+    }
+  }, [isAdmin, isLoading]);
+
+  // Attendre que le chargement soit terminé avant de rediriger
+  if (isLoading) {
+    return <div className="p-6">Chargement des permissions...</div>;
+  }
+
+  if (!isAdmin) {
+    console.log('Redirection vers dashboard - pas admin');
+    return <Navigate to="/dashboard" />;
+  }
 
   return (
     <div className="p-6">
