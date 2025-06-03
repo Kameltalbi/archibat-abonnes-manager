@@ -63,20 +63,23 @@ export default function UserSessionsPage() {
             profilesMap.set(profile.id, profile.full_name);
           });
 
-          // Format the data
+          // Format the data with proper duration calculation
           const formatted = sessionsData.map((s: any) => {
             const login = new Date(s.login_time);
-            const logout = s.logout_time ? new Date(s.logout_time) : null;
-            const duration = logout
-              ? `${Math.round((logout.getTime() - login.getTime()) / 60000)} min`
-              : 'En cours';
+            const logout = s.logout_time ? new Date(s.logout_time) : new Date(); // Si pas de logout, utiliser maintenant
+            
+            // Calculer la durée en minutes
+            const durationMinutes = Math.round((logout.getTime() - login.getTime()) / 60000);
+            const duration = s.logout_time 
+              ? `${durationMinutes} min` 
+              : `${durationMinutes} min (en cours)`;
 
             return {
               id: s.id,
               user_id: s.user_id,
               user_name: profilesMap.get(s.user_id) || 'Utilisateur inconnu',
               login_time: format(login, 'dd/MM/yyyy HH:mm:ss'),
-              logout_time: logout ? format(logout, 'dd/MM/yyyy HH:mm:ss') : '—',
+              logout_time: s.logout_time ? format(new Date(s.logout_time), 'dd/MM/yyyy HH:mm:ss') : '—',
               duration,
             };
           });
