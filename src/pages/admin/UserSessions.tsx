@@ -14,11 +14,21 @@ interface Session {
 }
 
 export default function UserSessionsPage() {
-  const { isAdmin } = useUserRole();
+  const { isAdmin, userRole, isLoading } = useUserRole();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
 
+  console.log('UserSessions - isAdmin:', isAdmin);
+  console.log('UserSessions - userRole:', userRole);
+  console.log('UserSessions - isLoading:', isLoading);
+
+  // Attendre que le chargement soit terminé avant de rediriger
+  if (isLoading) {
+    return <div className="p-6">Chargement des permissions...</div>;
+  }
+
   if (!isAdmin) {
+    console.log('Redirection vers dashboard - pas admin');
     return <Navigate to="/dashboard" />;
   }
 
