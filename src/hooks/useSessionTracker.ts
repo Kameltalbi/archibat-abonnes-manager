@@ -1,13 +1,26 @@
 
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export const useSessionTracker = (user: any) => {
+  const { isAdmin, isLoading } = useUserRole();
+
   useEffect(() => {
+    // Ne pas suivre les sessions si l'utilisateur n'est pas connecté
     if (!user) return;
+    
+    // Ne pas suivre les sessions des administrateurs
+    if (isLoading) return; // Attendre que le rôle soit chargé
+    if (isAdmin) {
+      console.log('👑 Admin detecté - pas de suivi de session');
+      return;
+    }
 
     const registerLogin = async () => {
       try {
+        console.log('📊 Enregistrement de session pour utilisateur non-admin:', user.email);
+        
         // Vérifier s'il y a déjà une session active pour cet utilisateur
         const { data: existingSessions, error: checkError } = await supabase
           .from('user_sessions')
@@ -77,5 +90,5 @@ export const useSessionTracker = (user: any) => {
       registerLogout();
       window.removeEventListener('beforeunload', registerLogout);
     };
-  }, [user]);
+  }, [user, isAdmin, isLoading]);
 };

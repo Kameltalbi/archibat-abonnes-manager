@@ -4,6 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { Navigate } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
+import { PageHeader } from '@/components/common/PageHeader';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Users, Clock } from 'lucide-react';
 
 interface Session {
   id: string;
@@ -11,6 +14,7 @@ interface Session {
   login_time: string;
   logout_time: string;
   duration: string;
+  user_role: string;
 }
 
 export default function UserSessionsPage() {
@@ -49,13 +53,19 @@ export default function UserSessionsPage() {
         return;
       }
 
-      // Récupérer les profils pour les emails
+      // Récupérer les profils pour les emails et rôles
       const userIds = [...new Set(sessionsData.map(s => s.user_id))];
       console.log('👥 IDs utilisateurs uniques:', userIds.length);
 
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, email')
+        .select(`
+          id, 
+          email,
+          roles (
+            name
+          )
+        `)
         .in('id', userIds);
 
       if (profilesError) {
@@ -64,15 +74,26 @@ export default function UserSessionsPage() {
 
       console.log('📇 Profils récupérés:', profilesData?.length || 0);
 
-      // Créer un map des emails par user_id
-      const emailMap = new Map();
+      // Créer un map des emails et rôles par user_id
+      const userMap = new Map();
       if (profilesData) {
         profilesData.forEach(profile => {
-          emailMap.set(profile.id, profile.email);
+          userMap.set(profile.id, {
+            email: profile.email,
+            role: profile.roles?.name || 'Inconnu'
+          });
         });
       }
 
-      const formatted = sessionsData.map((s: any) => {
+      // Filtrer pour exclure les sessions des administrateurs
+      const nonAdminSessions = sessionsData.filter(session => {
+        const userData = userMap.get(session.user_id);
+        return userData && userData.role !== 'Admin';
+      });
+
+      console.log('📊 Sessions après filtrage (sans admins):', nonAdminSessions.length);
+
+      const formatted = nonAdminSessions.map((s: any) => {
         const login = new Date(s.login_time);
         const logout = s.logout_time ? new Date(s.logout_time) : null;
 
@@ -90,11 +111,12 @@ export default function UserSessionsPage() {
           }
         }
 
-        const email = emailMap.get(s.user_id) || 'Email non trouvé';
+        const userData = userMap.get(s.user_id);
 
         return {
           id: s.id,
-          email,
+          email: userData?.email || 'Email non trouvé',
+          user_role: userData?.role || 'Rôle inconnu',
           login_time: format(login, 'dd/MM/yyyy HH:mm:ss'),
           logout_time: logout ? format(logout, 'dd/MM/yyyy HH:mm:ss') : '—',
           duration,
@@ -127,42 +149,64 @@ export default function UserSessionsPage() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Suivi des connexions utilisateur</h1>
+    <div className="p-6 space-y-6">
+      <PageHeader
+        title="Suivi des connexions utilisateur"
+        description="Surveillance des sessions des utilisateurs non-administrateurs"
+        icon={<Users className="w-6 h-6" />}
+      />
 
       {loading ? (
-        <p>Chargement...</p>
+        <div className="flex items-center justify-center py-8">
+          <Clock className="w-6 h-6 animate-spin mr-2" />
+          <span>Chargement des sessions...</span>
+        </div>
       ) : sessions.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500 mb-4">Aucune session trouvée</p>
+        <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+          <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500 mb-2 font-medium">Aucune session trouvée</p>
           <p className="text-sm text-gray-400">
-            Les sessions des utilisateurs apparaîtront ici une fois qu'ils se connecteront à l'application.
+            Les sessions des utilisateurs non-administrateurs apparaîtront ici une fois qu'ils se connecteront à l'application.
+          </p>
+          <p className="text-xs text-gray-400 mt-2">
+            Note : Les connexions des administrateurs ne sont pas suivies.
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border border-gray-300">
-            <thead className="bg-gray-100 text-left">
-              <tr>
-                <th className="p-2 border">Utilisateur</th>
-                <th className="p-2 border">Heure de connexion</th>
-                <th className="p-2 border">Heure de déconnexion</th>
-                <th className="p-2 border">Durée</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sessions.map((s) => (
-                <tr key={s.id} className="hover:bg-gray-50">
-                  <td className="p-2 border">{s.email}</td>
-                  <td className="p-2 border">{s.login_time}</td>
-                  <td className="p-2 border">{s.logout_time}</td>
-                  <td className="p-2 border">{s.duration}</td>
-                </tr>
+        <div className="bg-white rounded-lg border shadow-sm">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50">
+                <TableHead className="font-semibold">Utilisateur</TableHead>
+                <TableHead className="font-semibold">Rôle</TableHead>
+                <TableHead className="font-semibold">Heure de connexion</TableHead>
+                <TableHead className="font-semibold">Heure de déconnexion</TableHead>
+                <TableHead className="font-semibold">Durée</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sessions.map((session) => (
+                <TableRow key={session.id} className="hover:bg-gray-50">
+                  <TableCell className="font-medium">{session.email}</TableCell>
+                  <TableCell>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {session.user_role}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-sm">{session.login_time}</TableCell>
+                  <TableCell className="text-sm">{session.logout_time}</TableCell>
+                  <TableCell className="text-sm font-medium">{session.duration}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-          <div className="mt-4 text-sm text-gray-500">
-            Total : {sessions.length} session(s)
+            </TableBody>
+          </Table>
+          <div className="px-6 py-4 border-t bg-gray-50 text-sm text-gray-600">
+            <div className="flex justify-between items-center">
+              <span>Total : {sessions.length} session(s) d'utilisateurs non-administrateurs</span>
+              <span className="text-xs text-gray-500">
+                🛡️ Les connexions administrateurs ne sont pas surveillées
+              </span>
+            </div>
           </div>
         </div>
       )}
