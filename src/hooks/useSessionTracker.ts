@@ -7,26 +7,46 @@ export const useSessionTracker = (user: any) => {
     if (!user) return;
 
     const registerLogin = async () => {
-      const { data, error } = await supabase
-        .from('user_sessions')
-        .insert([{ user_id: user.id }])
-        .select();
+      try {
+        const { data, error } = await supabase
+          .from('user_sessions')
+          .insert([{ user_id: user.id }])
+          .select();
 
-      if (data && data.length > 0) {
-        localStorage.setItem('lastSessionId', data[0].id);
+        if (error) {
+          console.error('Error creating session:', error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          localStorage.setItem('lastSessionId', data[0].id);
+          console.log('Session created:', data[0].id);
+        }
+      } catch (error) {
+        console.error('Error in registerLogin:', error);
       }
     };
 
     const registerLogout = async () => {
-      const sessionId = localStorage.getItem('lastSessionId');
-      if (!sessionId) return;
+      try {
+        const sessionId = localStorage.getItem('lastSessionId');
+        if (!sessionId) return;
 
-      await supabase
-        .from('user_sessions')
-        .update({ logout_time: new Date().toISOString() })
-        .eq('id', sessionId);
+        const { error } = await supabase
+          .from('user_sessions')
+          .update({ logout_time: new Date().toISOString() })
+          .eq('id', sessionId);
 
-      localStorage.removeItem('lastSessionId');
+        if (error) {
+          console.error('Error updating session logout:', error);
+        } else {
+          console.log('Session logout recorded');
+        }
+
+        localStorage.removeItem('lastSessionId');
+      } catch (error) {
+        console.error('Error in registerLogout:', error);
+      }
     };
 
     registerLogin();
