@@ -1,23 +1,18 @@
+
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { Navigate } from 'react-router-dom';
-import { useUser } from '@/hooks/useUser'; // à adapter
 
 export default function UserSessionsPage() {
-  const { user } = useUser();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  if (user?.role !== 'admin') {
-    return <Navigate to="/dashboard" />;
-  }
 
   useEffect(() => {
     const fetchSessions = async () => {
       const { data, error } = await supabase
         .from('user_sessions')
-        .select('id, user_id, login_time, logout_time, auth.users(email)')
+        .select('id, user_id, login_time, logout_time')
         .order('login_time', { ascending: false });
 
       if (data) {
@@ -30,7 +25,7 @@ export default function UserSessionsPage() {
 
           return {
             id: s.id,
-            email: s.auth?.users?.email || 'Inconnu',
+            user_id: s.user_id,
             login_time: format(login, 'Pp'),
             logout_time: logout ? format(logout, 'Pp') : '—',
             duration,
@@ -63,7 +58,7 @@ export default function UserSessionsPage() {
           <tbody>
             {sessions.map((s: any) => (
               <tr key={s.id} className="hover:bg-gray-50">
-                <td className="border p-2">{s.email}</td>
+                <td className="border p-2">{s.user_id}</td>
                 <td className="border p-2">{s.login_time}</td>
                 <td className="border p-2">{s.logout_time}</td>
                 <td className="border p-2">{s.duration}</td>
@@ -75,4 +70,3 @@ export default function UserSessionsPage() {
     </div>
   );
 }
-
