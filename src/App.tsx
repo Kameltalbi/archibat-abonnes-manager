@@ -19,7 +19,6 @@ import WeeklyProgram from "./pages/WeeklyProgram";
 import Settings from "./pages/Settings";
 import Prospection from "./pages/Prospection";
 import NewSubscriber from "./pages/NewSubscriber";
-import Performance from "./pages/Performance";
 
 const queryClient = new QueryClient();
 
@@ -90,14 +89,6 @@ const App = () => (
           <Route path="/prospection" element={
             <AppLayout>
               <Prospection />
-            </AppLayout>
-          } />
-          {/* Add route for Performance - Protected by AdminRoute */}
-          <Route path="/performance" element={
-            <AppLayout>
-              <AdminRoute>
-                <Performance />
-              </AdminRoute>
             </AppLayout>
           } />
           <Route path="*" element={<NotFound />} />
