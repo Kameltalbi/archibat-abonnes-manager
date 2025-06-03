@@ -1,81 +1,66 @@
-
 import { useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 
 export const useSessionTracker = (user: any) => {
   useEffect(() => {
     if (!user) return;
 
-    const registerLogin = async () => {
-      try {
-        // Vérifier s'il y a déjà une session active pour cet utilisateur
-        const { data: existingSessions, error: checkError } = await supabase
-          .from('user_sessions')
-          .select('id')
-          .eq('user_id', user.id)
-          .is('logout_time', null)
-          .limit(1);
+    const startSessionIfNotExists = async () => {
+      // Vérifie s'il y a une session ouverte (pas de logout_time)
+      const { data: existing, error: fetchError } = await supabase
+        .from('user_sessions')
+        .select('id')
+        .eq('user_id', user.id)
+        .is('logout_time', null)
+        .limit(1)
+        .order('login_time', { ascending: false });
 
-        if (checkError) {
-          console.error('Error checking existing sessions:', checkError);
-          return;
-        }
+      if (fetchError) {
+        console.error('Erreur vérification session existante :', fetchError);
+        return;
+      }
 
-        // S'il y a déjà une session active, on l'utilise
-        if (existingSessions && existingSessions.length > 0) {
-          localStorage.setItem('lastSessionId', existingSessions[0].id);
-          console.log('Using existing session:', existingSessions[0].id);
-          return;
-        }
+      if (existing && existing.length > 0) {
+        // Session déjà ouverte → ne rien faire
+        localStorage.setItem('lastSessionId', existing[0].id);
+        return;
+      }
 
-        // Sinon, créer une nouvelle session
-        const { data, error } = await supabase
-          .from('user_sessions')
-          .insert([{ user_id: user.id }])
-          .select();
+      // Aucune session ouverte → en créer une
+      const { data, error } = await supabase
+        .from('user_sessions')
+        .insert([{ user_id: user.id }])
+        .select();
 
-        if (error) {
-          console.error('Error creating session:', error);
-          return;
-        }
-
-        if (data && data.length > 0) {
-          localStorage.setItem('lastSessionId', data[0].id);
-          console.log('New session created:', data[0].id);
-        }
-      } catch (error) {
-        console.error('Error in registerLogin:', error);
+      if (error) {
+        console.error('Erreur enregistrement nouvelle session :', error);
+      } else {
+        localStorage.setItem('lastSessionId', data[0].id);
       }
     };
 
-    const registerLogout = async () => {
-      try {
-        const sessionId = localStorage.getItem('lastSessionId');
-        if (!sessionId) return;
+    const closeSession = async () => {
+      const sessionId = localStorage.getItem('lastSessionId');
+      if (!sessionId) return;
 
-        const { error } = await supabase
-          .from('user_sessions')
-          .update({ logout_time: new Date().toISOString() })
-          .eq('id', sessionId);
+      const { error } = await supabase
+        .from('user_sessions')
+        .update({ logout_time: new Date().toISOString() })
+        .eq('id', sessionId);
 
-        if (error) {
-          console.error('Error updating session logout:', error);
-        } else {
-          console.log('Session logout recorded');
-        }
-
+      if (!error) {
         localStorage.removeItem('lastSessionId');
-      } catch (error) {
-        console.error('Error in registerLogout:', error);
       }
     };
 
-    registerLogin();
+    // Lancement à la connexion
+    startSessionIfNotExists();
 
-    window.addEventListener('beforeunload', registerLogout);
+    // Fermeture automatique si on quitte la page
+    window.addEventListener('beforeunload', closeSession);
     return () => {
-      registerLogout();
-      window.removeEventListener('beforeunload', registerLogout);
+      closeSession();
+      window.removeEventListener('beforeunload', closeSession);
     };
   }, [user]);
 };
