@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -26,7 +25,8 @@ import {
   SettingsIcon,
   LogOutIcon,
   PhoneCallIcon,
-  TrendingUpIcon
+  TrendingUpIcon,
+  ActivityIcon
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -50,6 +50,7 @@ export function AppSidebar({ isOpen }: AppSidebarProps) {
     { title: "Calendrier", icon: CalendarIcon, url: "/calendrier" },
     { title: "Programme de travail", icon: ListIcon, url: "/programme" },
     ...(isAdmin ? [{ title: "Performance", icon: TrendingUpIcon, url: "/performance" }] : []),
+    ...(isAdmin ? [{ title: "Suivi des connexions", icon: ActivityIcon, url: "/admin/user-sessions" }] : []),
     { title: "Paramètres", icon: SettingsIcon, url: "/parametres" }
   ];
 

@@ -19,6 +19,7 @@ import WeeklyProgram from "./pages/WeeklyProgram";
 import Settings from "./pages/Settings";
 import Prospection from "./pages/Prospection";
 import NewSubscriber from "./pages/NewSubscriber";
+import UserSessions from "./pages/admin/UserSessions";
 
 const queryClient = new QueryClient();
 
@@ -89,6 +90,12 @@ const App = () => (
           <Route path="/prospection" element={
             <AppLayout>
               <Prospection />
+            </AppLayout>
+          } />
+          {/* Add route for Admin User Sessions */}
+          <Route path="/admin/user-sessions" element={
+            <AppLayout>
+              <UserSessions />
             </AppLayout>
           } />
           <Route path="*" element={<NotFound />} />
