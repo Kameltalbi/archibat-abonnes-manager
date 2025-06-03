@@ -3,9 +3,26 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { AdminRoute } from '@/components/auth/AdminRoute';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+
+interface SessionData {
+  id: string;
+  user_id: string;
+  user_name: string;
+  login_time: string;
+  logout_time: string;
+  duration: string;
+}
 
 export default function UserSessionsPage() {
-  const [sessions, setSessions] = useState([]);
+  const [sessions, setSessions] = useState<SessionData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,7 +31,13 @@ export default function UserSessionsPage() {
       try {
         const { data, error } = await supabase
           .from('user_sessions')
-          .select('id, user_id, login_time, logout_time')
+          .select(`
+            id, 
+            user_id, 
+            login_time, 
+            logout_time,
+            profiles!inner(full_name)
+          `)
           .order('login_time', { ascending: false });
 
         if (error) {
@@ -34,6 +57,7 @@ export default function UserSessionsPage() {
             return {
               id: s.id,
               user_id: s.user_id,
+              user_name: s.profiles?.full_name || 'Utilisateur inconnu',
               login_time: format(login, 'dd/MM/yyyy HH:mm:ss'),
               logout_time: logout ? format(logout, 'dd/MM/yyyy HH:mm:ss') : '—',
               duration,
@@ -62,34 +86,34 @@ export default function UserSessionsPage() {
           <p className="text-red-600">{error}</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border text-sm">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="border p-2 text-left">ID Utilisateur</th>
-                  <th className="border p-2 text-left">Connexion</th>
-                  <th className="border p-2 text-left">Déconnexion</th>
-                  <th className="border p-2 text-left">Durée</th>
-                </tr>
-              </thead>
-              <tbody>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nom Utilisateur</TableHead>
+                  <TableHead>Connexion</TableHead>
+                  <TableHead>Déconnexion</TableHead>
+                  <TableHead>Durée</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {sessions.length > 0 ? (
-                  sessions.map((s: any) => (
-                    <tr key={s.id} className="hover:bg-gray-50">
-                      <td className="border p-2 font-mono text-xs">{s.user_id}</td>
-                      <td className="border p-2">{s.login_time}</td>
-                      <td className="border p-2">{s.logout_time}</td>
-                      <td className="border p-2">{s.duration}</td>
-                    </tr>
+                  sessions.map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell className="font-medium">{s.user_name}</TableCell>
+                      <TableCell>{s.login_time}</TableCell>
+                      <TableCell>{s.logout_time}</TableCell>
+                      <TableCell>{s.duration}</TableCell>
+                    </TableRow>
                   ))
                 ) : (
-                  <tr>
-                    <td colSpan={4} className="border p-4 text-center text-gray-500">
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-gray-500 py-8">
                       Aucune session trouvée
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 )}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>
