@@ -28,6 +28,8 @@ export default function UserSessionsPage() {
 
   useEffect(() => {
     const fetchSessions = async () => {
+      if (isLoading || !isAdmin) return;
+      
       console.log('🔍 Début du chargement des sessions...');
       
       // Première requête pour récupérer toutes les sessions
@@ -98,16 +100,31 @@ export default function UserSessionsPage() {
         const logout = s.logout_time ? new Date(s.logout_time) : null;
 
         let duration = 'En cours';
-        if (logout) {
+        if (logout && login) {
           const diffMs = logout.getTime() - login.getTime();
-          const totalMinutes = Math.floor(diffMs / (1000 * 60));
+          const totalSeconds = Math.floor(diffMs / 1000);
+          const totalMinutes = Math.floor(totalSeconds / 60);
+          const hours = Math.floor(totalMinutes / 60);
+          const minutes = totalMinutes % 60;
+          const seconds = totalSeconds % 60;
           
-          if (totalMinutes >= 60) {
-            const hours = Math.floor(totalMinutes / 60);
-            const minutes = totalMinutes % 60;
+          console.log('⏱️ Calcul durée pour session:', s.id, {
+            login: login.toISOString(),
+            logout: logout.toISOString(),
+            diffMs,
+            totalSeconds,
+            totalMinutes,
+            hours,
+            minutes,
+            seconds
+          });
+          
+          if (hours > 0) {
             duration = `${hours}h ${minutes}min`;
+          } else if (minutes > 0) {
+            duration = `${minutes}min ${seconds}s`;
           } else {
-            duration = `${totalMinutes} min`;
+            duration = `${seconds}s`;
           }
         }
 
